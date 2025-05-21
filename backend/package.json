@@ -2,7 +2,7 @@
   "name": "orbital25",
   "version": "1.0.0",
   "description": "## Project Scope A smart mobile app that helps users automatically track expenses, detect financial anomalies, and gain predictive insights into spending and investments.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/quantcoder88/orbital25#readme",
   "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
     "express": "^5.1.0"
   }
 }
