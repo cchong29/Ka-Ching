@@ -1,0 +1,14 @@
+const express = require('express')
+const router = express.Router()
+
+router.get('/users',(req,res)=>{
+    const userData = [
+        {
+            "phone" : 1,
+        }
+    ]
+
+    res.send(userData)
+})
+
+module.exports = router

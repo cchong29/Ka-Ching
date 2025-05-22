@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint"
   },
+  "proxy" : "http://localhost:4000", 
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
