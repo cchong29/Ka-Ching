@@ -40,8 +40,8 @@ const Register = () => {
       />
 
 
-    <ThemedButton onPress = {handleEmail}>
-      <Text style = {{textAlign : 'center',color : '#137547'}}> Continue </Text>
+    <ThemedButton onPress = {handleEmail} style = {{width : '80%',backgroundColor : 'black'}}>
+    <ThemedText style = {{color : 'white', alignSelf : 'center'}}> Continue </ThemedText>
     </ThemedButton>
 
     <Spacer height = {100} />
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems : 'center',
   },
   
   title: {

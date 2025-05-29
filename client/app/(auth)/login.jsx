@@ -3,6 +3,9 @@ import {Text, StyleSheet,Pressable, Image, TextInput, View, TouchableOpacity, T 
 import {useState} from 'react'
 import {Link} from 'expo-router'
 import {Colors} from '@/constants/Colors'
+import { useFormik } from 'formik';
+import * as Yup from 'yup'
+
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
@@ -14,75 +17,96 @@ import ThemedButton from '@/components/ThemedButton'
 import ThemedLogo from '@/components/ThemedLogo'
 
 
-const Login = ({promptAsync}) => {
-  const [email,setEmail] = useState('')
-  const [password,setPassword] = useState('')
-
-  const handleSubmit = ()=>{
-    console.log('Login form submitted',email,password)
-  }
+const Login = ({ promptAsync }) => {
+  const formik = useFormik({
+    initialValues: { email: '', password: '' },
+    validationSchema: Yup.object({
+      email: Yup.string().email('Invalid email').required('Email is required'),
+      password: Yup.string().min(6, 'Password too short').required('Password is required'),
+    }),
+    onSubmit: (values,actions) => {
+      const vals = {...values}
+      actions.resetForm()
+      fetch('http://localhost:4000/auth/login',{
+        method: 'POST',
+        credentials : 'include',
+        headers : {
+          'Content-Type' : 'application/json',
+        },
+        body : JSON.stringify(vals),
+      }).catch(err=>{
+        return;
+      }).then(res=>{
+        if (!res || !res.ok || res.status >=400){
+          return;
+        } 
+        return res.json();
+      }).then(data=>{
+        if (!data) return;
+        console.log(data);
+      })
+    },
+  });
 
   return (
-    <ThemedView style = {styles.container}>
-      <ThemedLogo source = {kachinglogo} style = {{alignSelf:'center'}}/>
+    <ThemedView style={styles.container}>
+      <ThemedLogo style={{ alignSelf: 'center' }} />
       <Spacer />
 
-      <ThemedTextInput 
-      style = {{width : '80%',marginBottom : 20}}
-      placeholder = 'Email address'
-      keyboardType = 'email-address'
-      onChangeText = {setEmail}
-      value = {email}
+      <ThemedTextInput
+        style={{ width: '80%', marginBottom: 5 }}
+        placeholder="Email address"
+        keyboardType="email-address"
+        onChangeText={formik.handleChange('email')}
+        onBlur={formik.handleBlur('email')}
+        value={formik.values.email}
       />
+      {formik.touched.email && formik.errors.email && (
+        <ThemedText style={{ color: 'red' }}>{formik.errors.email}</ThemedText>
+      )}
 
-      <ThemedTextInput 
-      style = {{width : '80%',marginBottom : 20}}
-      placeholder = 'Password'
-      onChangeText = {setPassword}
-      value = {password}
-      secureTextEntry
+      <ThemedTextInput
+        style={{ width: '80%', marginBottom: 5 }}
+        placeholder="Password"
+        secureTextEntry
+        onChangeText={formik.handleChange('password')}
+        onBlur={formik.handleBlur('password')}
+        value={formik.values.password}
       />
+      {formik.touched.password && formik.errors.password && (
+        <ThemedText style={{ color: 'red' }}>{formik.errors.password}</ThemedText>
+      )}
 
-      <View style = {{width : '80%', alignItems : 'flex-end'}}>
-      <Link href='/'>
-      <ThemedText> Forgot Password?</ThemedText>
-      </Link>
+      <View style={{ width: '80%', alignItems: 'flex-end' }}>
+        <Link href="/">
+          <ThemedText> Forgot Password?</ThemedText>
+        </Link>
       </View>
 
-    <ThemedButton onPress = {handleSubmit} style = {{width : '80%'}}>
-      <ThemedText style = {{color : 'white', alignSelf : 'center'}}> Log In </ThemedText>
-    </ThemedButton>
+      <ThemedButton onPress={formik.handleSubmit} style={{ width: '80%' }}>
+        <ThemedText style={{ color: 'white', alignSelf: 'center' }}> Log In </ThemedText>
+      </ThemedButton>
 
-    
-    <ThemedText>or</ThemedText>
+      <ThemedText>or</ThemedText>
 
-    <TouchableOpacity 
-    
-    onPress={promptAsync}>
-        <ThemedText>
-            Continue with Google
-        </ThemedText>
+      <TouchableOpacity onPress={promptAsync}>
+        <ThemedText>Continue with Google</ThemedText>
+      </TouchableOpacity>
 
-    </TouchableOpacity>
+      <Spacer height={100} />
 
-    <Spacer height = {100} />
-
-    <ThemedText style = {{textAlign : 'center',margin : 30, fontSize : 9}}>
+      <ThemedText style={{ textAlign: 'center', margin: 30, fontSize: 9 }}>
         By clicking continue, you agree to our Terms of Service and Privacy Policy
-    </ThemedText> 
+      </ThemedText>
 
-    <Link href='/register'>
-    <ThemedText style = {{textAlign: 'center'}}>
-      Don't have an account? Sign up
-    </ThemedText>
-    </Link>  
-
+      <Link href="/register">
+        <ThemedText style={{ textAlign: 'center' }}>
+          Don't have an account? Sign up
+        </ThemedText>
+      </Link>
     </ThemedView>
-
-
-    
-  )
-}
+  );
+};
 
 export default Login
 

@@ -342,57 +342,12 @@ PODS:
     - ExpoModulesCore
   - fast_float (6.1.4)
   - FBLazyVector (0.79.2)
-  - Firebase/Auth (11.12.0):
-    - Firebase/CoreOnly
-    - FirebaseAuth (~> 11.12.0)
-  - Firebase/CoreOnly (11.12.0):
-    - FirebaseCore (~> 11.12.0)
-  - FirebaseAppCheckInterop (11.13.0)
-  - FirebaseAuth (11.12.0):
-    - FirebaseAppCheckInterop (~> 11.0)
-    - FirebaseAuthInterop (~> 11.0)
-    - FirebaseCore (~> 11.12.0)
-    - FirebaseCoreExtension (~> 11.12.0)
-    - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
-    - GoogleUtilities/Environment (~> 8.0)
-    - GTMSessionFetcher/Core (< 5.0, >= 3.4)
-    - RecaptchaInterop (~> 101.0)
-  - FirebaseAuthInterop (11.13.0)
-  - FirebaseCore (11.12.0):
-    - FirebaseCoreInternal (~> 11.12.0)
-    - GoogleUtilities/Environment (~> 8.0)
-    - GoogleUtilities/Logger (~> 8.0)
-  - FirebaseCoreExtension (11.12.0):
-    - FirebaseCore (~> 11.12.0)
-  - FirebaseCoreInternal (11.12.0):
-    - "GoogleUtilities/NSData+zlib (~> 8.0)"
   - fmt (11.0.2)
   - glog (0.3.5)
   - GoogleSignIn (7.1.0):
     - AppAuth (< 2.0, >= 1.7.3)
     - GTMAppAuth (< 5.0, >= 4.1.1)
     - GTMSessionFetcher/Core (~> 3.3)
-  - GoogleUtilities/AppDelegateSwizzler (8.1.0):
-    - GoogleUtilities/Environment
-    - GoogleUtilities/Logger
-    - GoogleUtilities/Network
-    - GoogleUtilities/Privacy
-  - GoogleUtilities/Environment (8.1.0):
-    - GoogleUtilities/Privacy
-  - GoogleUtilities/Logger (8.1.0):
-    - GoogleUtilities/Environment
-    - GoogleUtilities/Privacy
-  - GoogleUtilities/Network (8.1.0):
-    - GoogleUtilities/Logger
-    - "GoogleUtilities/NSData+zlib"
-    - GoogleUtilities/Privacy
-    - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (8.1.0)":
-    - GoogleUtilities/Privacy
-  - GoogleUtilities/Privacy (8.1.0)
-  - GoogleUtilities/Reachability (8.1.0):
-    - GoogleUtilities/Logger
-    - GoogleUtilities/Privacy
   - GTMAppAuth (4.1.1):
     - AppAuth/Core (~> 1.7)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
@@ -2162,7 +2117,6 @@ PODS:
     - React-logger (= 0.79.2)
     - React-perflogger (= 0.79.2)
     - React-utils (= 0.79.2)
-  - RecaptchaInterop (101.0.0)
   - RNCAsyncStorage (2.1.2):
     - DoubleConversion
     - glog
@@ -2187,13 +2141,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNFBApp (22.2.0):
-    - Firebase/CoreOnly (= 11.12.0)
-    - React-Core
-  - RNFBAuth (22.2.0):
-    - Firebase/Auth (= 11.12.0)
-    - React-Core
-    - RNFBApp
   - RNGestureHandler (2.24.0):
     - DoubleConversion
     - glog
@@ -2533,8 +2480,6 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
-  - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
-  - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -2544,21 +2489,12 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - AppAuth
-    - Firebase
-    - FirebaseAppCheckInterop
-    - FirebaseAuth
-    - FirebaseAuthInterop
-    - FirebaseCore
-    - FirebaseCoreExtension
-    - FirebaseCoreInternal
     - GoogleSignIn
-    - GoogleUtilities
     - GTMAppAuth
     - GTMSessionFetcher
     - libavif
     - libdav1d
     - libwebp
-    - RecaptchaInterop
     - SDWebImage
     - SDWebImageAVIFCoder
     - SDWebImageSVGCoder
@@ -2763,10 +2699,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
-  RNFBApp:
-    :path: "../node_modules/@react-native-firebase/app"
-  RNFBAuth:
-    :path: "../node_modules/@react-native-firebase/auth"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
@@ -2810,17 +2742,9 @@ SPEC CHECKSUMS:
   EXUpdatesInterface: 7ff005b7af94ee63fa452ea7bb95d7a8ff40277a
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 84b955f7b4da8b895faf5946f73748267347c975
-  Firebase: 735108d2d0b67827cd929bfe8254983907c4479f
-  FirebaseAppCheckInterop: 72066489c209823649a997132bcd9269bc33a4bb
-  FirebaseAuth: 4ce97ceb271fce2b6cec6c53021930841442b15a
-  FirebaseAuthInterop: 4fa327ec3c551a80a6929561f83af80b1dd44937
-  FirebaseCore: 9d7a0caf39ec7317fbe13b3c7864c8c2acc60da8
-  FirebaseCoreExtension: 5e42645fd3f7c2c59ea5ed7641dd58f02bc565d1
-  FirebaseCoreInternal: 480d23e21f699cc7bcbc3d8eaa301f15d1e3ffaf
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
-  GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   hermes-engine: 314be5250afa5692b57b4dd1705959e1973a8ebe
@@ -2891,10 +2815,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 04d5eb15eb46be6720e17a4a7fa92940a776e584
   ReactCodegen: c63eda03ba1d94353fb97b031fc84f75a0d125ba
   ReactCommon: 76d2dc87136d0a667678668b86f0fca0c16fdeb0
-  RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   RNCAsyncStorage: 39c42c1e478e1f5166d1db52b5055e090e85ad66
-  RNFBApp: 2b2bb0f17eb6732e2e90d9c57bfde443cd7fc681
-  RNFBAuth: b5e52895796572e99a9024ae0d601ef8b21588ac
   RNGestureHandler: 7d0931a61d7ba0259f32db0ba7d0963c3ed15d2b
   RNGoogleSignin: 180d2e70fa258bbcdb642c77d516880bce0055f1
   RNReanimated: 2313402fe27fecb7237619e9c6fcee3177f08a65
@@ -2906,6 +2827,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: c758bfb934100bb4bf9cbaccb52557cee35e8bdf
 
-PODFILE CHECKSUM: d163db764cdcc3db2ac13665a493cdf4878f6ad6
+PODFILE CHECKSUM: 8d86f265fa40d5f7ee74e849d5292c48ca82abe4
 
 COCOAPODS: 1.16.2
