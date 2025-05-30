@@ -21,9 +21,9 @@ router.post('/login',async (req,res)=>{
             // login
             req.session.user = { // storing an obj called user in the session
                 email: req.body.email,
-                id : newUserQuery.rows[0].id,
+                id : potentialLogin.rows[0].id,
             }
-            res.json({loggedIn : true,email}) // sending back an object with the email
+            res.json({loggedIn : true,email:req.body.email}) // sending back an object with the email
 
         } else {
             // password is wrong
@@ -50,7 +50,7 @@ router.post('/register',async(req,res)=>{
         [req.body.email]
     );
 
-    if (existingUser.rowCount ===0){
+    if (existingUser.rowCount === 0){
         //register
         const hashedPass = await bcrypt.hash(req.body.password,10);
         const newUserQuery = await pool.query(
@@ -61,7 +61,7 @@ router.post('/register',async(req,res)=>{
             email : req.body.email,
             id : newUserQuery.rows[0].id,
         }
-        res.json({loggedIn : true,email})
+        res.json({loggedIn : true,email:req.body.email})
     } else {
         res.json({loggedIn : false,status : 'email taken'});
     }

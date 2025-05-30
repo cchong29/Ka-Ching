@@ -1,48 +1,95 @@
 // This will be the first page any user sees when they click on the app
 import {Text, StyleSheet,Pressable, Image, TextInput } from 'react-native'
-import {useState} from 'react'
-import {Link} from 'expo-router'
+import { useRouter } from 'expo-router';
 import {Colors} from '@/constants/Colors'
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
-import kachinglogo from '@/assets/images/ka-ching-logo.png'
+import ThemedLogo from '@/components/ThemedLogo'
 import Spacer from '@/components/Spacer'
 import ThemedText  from '@/components/ThemedText'
 import ThemedTextInput from '@/components/ThemedTextInput'
 import ThemedButton from '@/components/ThemedButton'
 
-const Register = () => {
-  const [email,setEmail] = useState('')
+const router = useRouter();
 
-  const handleEmail = ()=>{
-    console.log('Email submitted',email)
-  }
+const Register = () => {
+  const formik = useFormik({
+    initialValues: { email: '', password: '' },
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .email('Invalid email format')
+        .required('Email is required'),
+      password: Yup.string()
+        .min(6, 'Password must be at least 6 characters')
+        .required('Password is required'),
+    }),
+    onSubmit: (values,actions) => {
+      const vals = {...values}
+      actions.resetForm()
+      fetch('http://localhost:4000/auth/register',{
+        method: 'POST',
+        credentials : 'include',
+        headers : {
+          'Content-Type' : 'application/json',
+        },
+        body : JSON.stringify(vals),
+      }).catch(err=>{
+        return;
+      }).then(res=>{
+        if (!res || !res.ok || res.status >=400){
+          return;
+        } 
+        return res.json();
+      }).then(data=>{
+        if (!data) return;
+        router.push('/home');
+      })
+    },
+  });
+
 
   return (
     <ThemedView style = {styles.container}>
-      <Image source = {kachinglogo} style = {{alignSelf:'center'}}/>
+      <ThemedLogo style={{ alignSelf: 'center' }} />
       <Spacer />
       <ThemedText title = {true} style = {styles.title}>
         Create an account
       </ThemedText>
 
-      <ThemedText style = {{textAlign : 'center'}}>
-        Enter your email to sign up for this app
-      </ThemedText>
-
-      <ThemedTextInput 
-      style = {{width : '80%',marginBottom : 20}}
-      placeholder = 'Email address'
-      keyboardType = 'email-address'
-      onChangeText = {setEmail}
-      value = {email}
+      
+      <ThemedTextInput
+        style={{ width: '80%', marginBottom: 5 }}
+        placeholder="Email address"
+        keyboardType="email-address"
+        onChangeText={formik.handleChange('email')}
+        onBlur={formik.handleBlur('email')}
+        value={formik.values.email}
       />
+      {formik.touched.email && formik.errors.email && (
+        <ThemedText style={{ color: 'red' }}>{formik.errors.email}</ThemedText>
+      )}
+
+      <ThemedTextInput
+        style={{ width: '80%', marginBottom: 5 }}
+        placeholder="Password"
+        secureTextEntry
+        onChangeText={formik.handleChange('password')}
+        onBlur={formik.handleBlur('password')}
+        value={formik.values.password}
+      />
+      {formik.touched.password && formik.errors.password && (
+        <ThemedText style={{ color: 'red' }}>{formik.errors.password}</ThemedText>
+      )}
 
 
-    <ThemedButton onPress = {handleEmail} style = {{width : '80%',backgroundColor : 'black'}}>
-    <ThemedText style = {{color : 'white', alignSelf : 'center'}}> Continue </ThemedText>
-    </ThemedButton>
+      <ThemedButton onPress={formik.handleSubmit} style={{ width: '80%' }}>
+        <ThemedText style={{ color: 'white', alignSelf: 'center' }}> Continue </ThemedText>
+      </ThemedButton>
+    
 
     <Spacer height = {100} />
 

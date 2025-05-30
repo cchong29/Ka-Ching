@@ -69,7 +69,6 @@
 
 
 
-// Youtube video
 const express = require('express')
 const {Server} = require('socket.io');
 const app = express()
@@ -108,7 +107,7 @@ app.use(
         resave : false, // doesn't save the session for no reason, only saves if sth changes
         saveUninitialized : false,
         cookie : {
-            secure : process.env.ENVIRONMENT === "production",
+            secure : process.env.ENVIRONMENT === "production" ? "true" : "auto",
             httpOnly : true,
             sameSite : process.env.ENVIRONMENT === "production"? "none" : "lax",
         }

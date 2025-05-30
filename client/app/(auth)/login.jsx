@@ -1,6 +1,6 @@
 // This will be the first page any user sees when they click on the app
 import {Text, StyleSheet,Pressable, Image, TextInput, View, TouchableOpacity, T } from 'react-native'
-import {useState} from 'react'
+import { useRouter } from 'expo-router';
 import {Link} from 'expo-router'
 import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
@@ -9,13 +9,13 @@ import * as Yup from 'yup';
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
-import kachinglogo from '@/assets/images/ka-ching-logo.png'
 import Spacer from '@/components/Spacer'
 import ThemedText  from '@/components/ThemedText'
 import ThemedTextInput from '@/components/ThemedTextInput'
 import ThemedButton from '@/components/ThemedButton'
 import ThemedLogo from '@/components/ThemedLogo'
 
+const router = useRouter();
 
 const Login = ({ promptAsync }) => {
   const formik = useFormik({
@@ -47,7 +47,7 @@ const Login = ({ promptAsync }) => {
         return res.json();
       }).then(data=>{
         if (!data) return;
-        console.log(data);
+        router.push('/home');
       })
     },
   });
@@ -99,10 +99,12 @@ const Login = ({ promptAsync }) => {
 
       <Spacer height={100} />
 
+      <Link href = "/t&c">
       <ThemedText style={{ textAlign: 'center', margin: 30, fontSize: 9 }}>
         By clicking continue, you agree to our Terms of Service and Privacy Policy
       </ThemedText>
-
+      </Link>
+      
       <Link href="/register">
         <ThemedText style={{ textAlign: 'center' }}>
           Don't have an account? Sign up
