@@ -4,7 +4,7 @@ import {useState} from 'react'
 import {Link} from 'expo-router'
 import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
-import * as Yup from 'yup'
+import * as Yup from 'yup';
 
 
 // Themed Components
@@ -21,8 +21,12 @@ const Login = ({ promptAsync }) => {
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: Yup.object({
-      email: Yup.string().email('Invalid email').required('Email is required'),
-      password: Yup.string().min(6, 'Password too short').required('Password is required'),
+      email: Yup.string()
+        .email('Invalid email format')
+        .required('Email is required'),
+      password: Yup.string()
+        .min(6, 'Password must be at least 6 characters')
+        .required('Password is required'),
     }),
     onSubmit: (values,actions) => {
       const vals = {...values}

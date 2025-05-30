@@ -76,8 +76,12 @@ const app = express()
 const helmet = require('helmet')
 const cors = require('cors')
 const authrouter = require('./routes/authrouter')
+const session = require("express-session");
 
 const server = require("http").createServer(app);
+
+// load env variables into this file
+require("dotenv").config()
 
 const io = new Server(server,{
     cors:{
@@ -96,7 +100,20 @@ app.use(cors({
     }))
 
 app.use(express.json()) // receive JSON and treat it like javascript obj
-
+app.use(
+    session({
+        secret : process.env.COOKIE_SECRET,
+        credentials : true,
+        name : "sid",
+        resave : false, // doesn't save the session for no reason, only saves if sth changes
+        saveUninitialized : false,
+        cookie : {
+            secure : process.env.ENVIRONMENT === "production",
+            httpOnly : true,
+            sameSite : process.env.ENVIRONMENT === "production"? "none" : "lax",
+        }
+    })
+)
 app.use('/auth',authrouter)
 
 app.get('/',(req,res)=>{

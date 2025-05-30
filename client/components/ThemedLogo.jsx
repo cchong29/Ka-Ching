@@ -1,10 +1,9 @@
 import {Image, useColorScheme} from 'react-native'
-
-//images
-const LightLogo = require('../assets/images/kachinglogo.png')
+const LightLogo = require('../assets/images/ka-ching-logo.png')
 const DarkLogo = require('../assets/images/kachinglogo_dark.png')
 
-const ThemedLogo = () => {
+
+const ThemedLogo = ({...props}) => {
     const colorScheme = useColorScheme()
 
     const logo = colorScheme === 'dark' ? DarkLogo : LightLogo
