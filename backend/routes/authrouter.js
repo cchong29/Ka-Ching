@@ -68,4 +68,39 @@ router.post('/register',async(req,res)=>{
 })
 
 
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+router.post('/google-login', async (req, res) => {
+  const { idToken } = req.body;
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+  const email = payload.email;
+
+  const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+
+  let userId;
+  if (existingUser.rowCount === 0) {
+    const newUser = await pool.query(
+      'INSERT INTO users (email, passhash) VALUES ($1, $2) RETURNING id',
+      [email, 'googleuser'] // or null/placeholder
+    );
+    userId = newUser.rows[0].id;
+  } else {
+    userId = existingUser.rows[0].id;
+  }
+
+  req.session.user = {
+    id: userId,
+    email,
+  };
+
+  res.json({ loggedIn: true, email });
+});
+
+
 module.exports = router // Exporting the router

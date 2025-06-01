@@ -15,13 +15,31 @@ export default function TabLayout() {
           ),
         }}
       />
-      
+       <Tabs.Screen
+        name="bank"
+        options={{
+          title: 'Add',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="add-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="expenses"
         options={{
           title: 'Expenses',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="list-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="investments"
+        options={{
+          title: 'Investments',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="bar-chart-outline" size={size} color={color} />
           ),
         }}
       />

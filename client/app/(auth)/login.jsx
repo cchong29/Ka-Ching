@@ -19,7 +19,7 @@ import ThemedLogo from '@/components/ThemedLogo'
 
 const router = useRouter();
 
-const Login = ({ promptAsync }) => {
+const Login = ({ promptAsync, isSigningIn }) => {
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: Yup.object({
@@ -127,8 +127,14 @@ const Login = ({ promptAsync }) => {
 
       <ThemedText>or</ThemedText>
 
-      <TouchableOpacity onPress={promptAsync}>
-        <ThemedText>Continue with Google</ThemedText>
+      <TouchableOpacity 
+        onPress={promptAsync} 
+        disabled={isSigningIn}
+        style={{ opacity: isSigningIn ? 0.6 : 1 }}
+      >
+        <ThemedText>
+          {isSigningIn ? 'Signing in...' : 'Continue with Google'}
+        </ThemedText>
       </TouchableOpacity>
 
       <Spacer height={100} />

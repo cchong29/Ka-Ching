@@ -1,0 +1,100 @@
+import { View, Image, Pressable, StyleSheet, Linking } from 'react-native';
+import ThemedView from '@/components/ThemedView';
+import ThemedText from '@/components/ThemedText';
+import { ScrollView } from 'react-native-gesture-handler';
+
+// const dbs = require('@/assets/images/dbs.png')
+
+export default function LinkBank() {
+  const handleConnect = () => {
+    // Replace with actual bank linking flow e.g., Finverse SDK/webview
+    alert('Bank connection flow triggered');
+  };
+
+  return (
+    <ThemedView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <ThemedText title style={styles.title}>Link Bank Account</ThemedText>
+        <ThemedText style={styles.description}>
+          Connect your bank account to import transactions automatically.
+        </ThemedText>
+
+        <Pressable style={styles.connectBtn} onPress={handleConnect}>
+          <ThemedText style={styles.connectBtnText}>Connect Bank</ThemedText>
+        </Pressable>
+
+        <ThemedText style={styles.infoText}>
+          We use Finverse to securely connect your bank. By continuing, you agree to our{' '}
+          <ThemedText style={styles.linkText} onPress={() => Linking.openURL('https://example.com/terms')}>Terms of Service</ThemedText> and{' '}
+          <ThemedText style={styles.linkText} onPress={() => Linking.openURL('https://example.com/privacy')}>Privacy Policy</ThemedText>.
+        </ThemedText>
+
+        <ThemedText title style={styles.supportedBanksText}>Supported Banks</ThemedText>
+
+        <View style={styles.bankRow}>
+          {/* <Image source={dbs} style={styles.bankLogo} /> */}
+          {/* <Image source={require('../assets/images/ocbc.png')} style={styles.bankLogo} />
+          <Image source={require('../assets/images/scb.jpg')} style={styles.bankLogo} /> */}
+        </View>
+      </ScrollView>
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 24,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  description: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 12,
+  },
+  connectBtn: {
+    backgroundColor: '#1F7D43',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  connectBtnText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  infoText: {
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#555',
+    marginHorizontal: 12,
+  },
+  linkText: {
+    textDecorationLine: 'underline',
+    color: '#2C7BE5',
+  },
+  supportedBanksText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  bankRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  bankLogo: {
+    width: 80,
+    height: 40,
+    resizeMode: 'contain',
+  },
+});
