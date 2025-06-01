@@ -1,11 +1,13 @@
-import { View, Image, Pressable, StyleSheet, Linking } from 'react-native';
+import { View, Image, Pressable, StyleSheet, Linking, TouchableOpacity } from 'react-native';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { ScrollView } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
-// const dbs = require('@/assets/images/dbs.png')
 
 export default function LinkBank() {
+  const router = useRouter();
   const handleConnect = () => {
     // Replace with actual bank linking flow e.g., Finverse SDK/webview
     alert('Bank connection flow triggered');
@@ -13,6 +15,10 @@ export default function LinkBank() {
 
   return (
     <ThemedView style={styles.container}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} />
+      </TouchableOpacity>
+
       <ScrollView contentContainerStyle={styles.content}>
         <ThemedText title style={styles.title}>Link Bank Account</ThemedText>
         <ThemedText style={styles.description}>
@@ -32,9 +38,9 @@ export default function LinkBank() {
         <ThemedText title style={styles.supportedBanksText}>Supported Banks</ThemedText>
 
         <View style={styles.bankRow}>
-          {/* <Image source={dbs} style={styles.bankLogo} /> */}
-          {/* <Image source={require('../assets/images/ocbc.png')} style={styles.bankLogo} />
-          <Image source={require('../assets/images/scb.jpg')} style={styles.bankLogo} /> */}
+          <Image source={require('@/assets/images/dbs.png')} style={styles.bankLogo} />
+          <Image source={require('@/assets/images/ocbc.png')} style={styles.bankLogo} />
+          <Image source={require('@/assets/images/scb.jpg')} style={styles.bankLogo} />
         </View>
       </ScrollView>
     </ThemedView>
@@ -58,6 +64,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginVertical: 12,
+  },
+  backBtn: {
+    marginBottom: 10,
+    padding:20,
   },
   connectBtn: {
     backgroundColor: '#1F7D43',

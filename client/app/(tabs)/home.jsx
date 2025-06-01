@@ -16,11 +16,7 @@ const Home = () => {
   return (
     <ThemedView style={styles.container}>
       {/* Top bar */}
-      <View style={styles.topBar}>
-        <Ionicons name="menu-outline" size={24} />
         <ThemedText title style={styles.welcomeText}>Hello, John!</ThemedText>
-        <Ionicons name="notifications-outline" size={24} />
-      </View>
 
       {/* Total Balance */}
       <View style={styles.balanceCard}>
@@ -73,6 +69,7 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop : 30,
     padding: 20,
   },
   topBar: {
@@ -81,8 +78,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   welcomeText: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    alignSelf : 'center',
   },
   balanceCard: {
     backgroundColor: '#fff',

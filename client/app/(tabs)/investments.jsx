@@ -1,4 +1,4 @@
-import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import ThemedView from '@/components/ThemedView';
@@ -7,9 +7,9 @@ import { useWindowDimensions } from 'react-native';
 
 export default function Investments() {
   const { width } = useWindowDimensions();
-
   return (
     <ThemedView style={{ flex: 1, padding: 20 }}>
+
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Back & Title */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
@@ -108,3 +108,9 @@ function Holding({ ticker, name, change, color, icon }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+    backBtn: {
+        marginBottom: 10,
+      },
+})
