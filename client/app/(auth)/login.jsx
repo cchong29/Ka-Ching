@@ -31,7 +31,7 @@ const Login = ({ promptAsync }) => {
     onSubmit: (values,actions) => {
       const vals = {...values}
       actions.resetForm()
-      fetch('http://localhost:4000/auth/login',{
+      fetch('http://192.168.68.108:4000/auth/login',{
         method: 'POST',
         credentials : 'include',
         headers : {
@@ -39,6 +39,7 @@ const Login = ({ promptAsync }) => {
         },
         body : JSON.stringify(vals),
       }).catch(err=>{
+        console.log(err);
         return;
       }).then(res=>{
         if (!res || !res.ok || res.status >=400){
@@ -104,7 +105,7 @@ const Login = ({ promptAsync }) => {
         By clicking continue, you agree to our Terms of Service and Privacy Policy
       </ThemedText>
       </Link>
-      
+
       <Link href="/register">
         <ThemedText style={{ textAlign: 'center' }}>
           Don't have an account? Sign up

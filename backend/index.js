@@ -84,7 +84,7 @@ require("dotenv").config()
 
 const io = new Server(server,{
     cors:{
-        origin : 'http://localhost:8081',
+        origin : 'http://192.168.68.108:8081',
         credentials : 'true',
 
     }
@@ -93,7 +93,7 @@ const io = new Server(server,{
 
 app.use(helmet())
 app.use(cors({
-        origin : 'http://localhost:8081',
+        origin : 'http://192.168.68.108:8081',
         credentials : 'true',
         optionSuccessStatus : 200,
     }))

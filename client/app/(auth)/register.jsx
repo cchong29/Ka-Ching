@@ -1,5 +1,6 @@
 // This will be the first page any user sees when they click on the app
-import {Text, StyleSheet,Pressable, Image, TextInput } from 'react-native'
+import {Text, StyleSheet,Pressable, Image, TextInput} from 'react-native'
+import {Link} from 'expo-router'
 import { useRouter } from 'expo-router';
 import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
@@ -30,7 +31,7 @@ const Register = () => {
     onSubmit: (values,actions) => {
       const vals = {...values}
       actions.resetForm()
-      fetch('http://localhost:4000/auth/register',{
+      fetch('http://192.168.68.108:4000/auth/register',{
         method: 'POST',
         credentials : 'include',
         headers : {
@@ -94,9 +95,11 @@ const Register = () => {
     <Spacer height = {100} />
 
     
-    <ThemedText style = {{textAlign : 'center',margin : 30}}>
+    <Link href = "/t&c">
+      <ThemedText style={{ textAlign: 'center', margin: 30, fontSize: 9 }}>
         By clicking continue, you agree to our Terms of Service and Privacy Policy
-    </ThemedText>  
+      </ThemedText>
+    </Link> 
 
     </ThemedView>
 
