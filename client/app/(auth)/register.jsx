@@ -47,7 +47,7 @@ const Register = () => {
         return res.json();
       }).then(data=>{
         if (!data) return;
-        router.push('/home');
+        router.push('/(tabs)/home');
       })
     },
   });

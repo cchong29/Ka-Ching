@@ -5,6 +5,8 @@ import {Link} from 'expo-router'
 import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import React, { useState } from 'react'; 
+
 
 
 // Themed Components
@@ -48,13 +50,44 @@ const Login = ({ promptAsync }) => {
         return res.json();
       }).then(data=>{
         if (!data) return;
-        router.push('/home');
+        router.push('/(tabs)/home');
       })
     },
   });
 
+
+  // Test to get data from backend
+  const [message, setMessage] = useState('');
+
+  const fetchData = async () => {
+    try {
+      const res = await fetch('http://192.168.68.108:4000/', {
+        method: 'GET',
+        credentials: 'include', // optional unless session is used
+      });
+
+      const test = await res.json(); // <- this will be 'hi'
+      console.log('Backend response:', test);
+      setMessage(test); // will be "hi"
+    } catch (err) {
+      console.error('Error fetching:', err);
+    }
+  };
+
+
   return (
     <ThemedView style={styles.container}>
+
+
+    <Pressable onPress={fetchData} style={{ marginVertical: 10 }}>
+    <ThemedText style={{ color: 'blue' }}>Tap to fetch from backend</ThemedText>
+    </Pressable>
+
+    {message ? (
+      <ThemedText style={{ marginTop: 10 }}>Backend says: {message}</ThemedText>
+    ) : null}
+
+
       <ThemedLogo style={{ alignSelf: 'center' }} />
       <Spacer />
 
