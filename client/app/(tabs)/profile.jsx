@@ -3,8 +3,10 @@ import { MaterialIcons, Feather, AntDesign, Ionicons } from '@expo/vector-icons'
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
+import { useRouter } from 'expo-router';
 
 export default function Profile() {
+  const router = useRouter()
   return (
     <ThemedView style={{ flex: 1, padding: 20 }}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -33,7 +35,7 @@ export default function Profile() {
         {/* Support and Legal */}
         <Section title="Support and Legal">
           <Item icon={<AntDesign name="questioncircleo" size={20} />} label="Help & Feedback" />
-          <Item icon={<Feather name="file-text" size={20} />} label="Terms of Service" />
+          <Item icon={<Feather name="file-text" size={20} />} label="Terms of Service" onPress={() => router.push('/(auth)/t&c')} />
           <Item icon={<Feather name="shield" size={20} />} label="Privacy Policy" />
         </Section>
 

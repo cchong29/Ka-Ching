@@ -4,18 +4,20 @@ import { LineChart } from 'react-native-chart-kit';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { useWindowDimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function Investments() {
   const { width } = useWindowDimensions();
+  const router = useRouter()
   return (
     <ThemedView style={{ flex: 1, padding: 20 }}>
-
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} />
+          </TouchableOpacity>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Back & Title */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-          <TouchableOpacity>
-            <Ionicons name="arrow-back" size={24} />
-          </TouchableOpacity>
+          
           <ThemedText title style={{ fontSize: 20, fontWeight: '600', marginLeft: 16 }}>
             Investments
           </ThemedText>
@@ -112,5 +114,6 @@ function Holding({ ticker, name, change, color, icon }) {
 const styles = StyleSheet.create({
     backBtn: {
         marginBottom: 10,
+        padding:20,
       },
 })

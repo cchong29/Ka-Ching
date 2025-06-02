@@ -31,7 +31,7 @@ export default function LinkBank() {
 
         <ThemedText style={styles.infoText}>
           We use Finverse to securely connect your bank. By continuing, you agree to our{' '}
-          <ThemedText style={styles.linkText} onPress={() => Linking.openURL('https://example.com/terms')}>Terms of Service</ThemedText> and{' '}
+          <ThemedText style={styles.linkText} onPress={() => router.push('/(auth)/t&c') }>Terms of Service</ThemedText> and{' '}
           <ThemedText style={styles.linkText} onPress={() => Linking.openURL('https://example.com/privacy')}>Privacy Policy</ThemedText>.
         </ThemedText>
 
@@ -40,7 +40,7 @@ export default function LinkBank() {
         <View style={styles.bankRow}>
           <Image source={require('@/assets/images/dbs.png')} style={styles.bankLogo} />
           <Image source={require('@/assets/images/ocbc.png')} style={styles.bankLogo} />
-          <Image source={require('@/assets/images/scb.jpg')} style={styles.bankLogo} />
+          <Image source={require('@/assets/images/scb.png')} style={styles.bankLogo} />
         </View>
       </ScrollView>
     </ThemedView>

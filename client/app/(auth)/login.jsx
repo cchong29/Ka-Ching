@@ -20,6 +20,8 @@ import ThemedLogo from '@/components/ThemedLogo'
 const router = useRouter();
 
 const Login = ({ promptAsync, isSigningIn }) => {
+  const [loginError, setLoginError] = useState('');
+
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: Yup.object({
@@ -42,15 +44,23 @@ const Login = ({ promptAsync, isSigningIn }) => {
         body : JSON.stringify(vals),
       }).catch(err=>{
         console.log(err);
+        setLoginError('Network error. Please try again.');
         return;
       }).then(res=>{
         if (!res || !res.ok || res.status >=400){
+          setLoginError('Something went wrong.');
           return;
         } 
         return res.json();
       }).then(data=>{
-        if (!data) return;
-        router.push('/(tabs)/home');
+        if (data.loggedIn) 
+        {
+          setLoginError('');
+          router.push('/(tabs)/home')
+        }
+        else {
+          setLoginError(data.status || 'Login failed.'); 
+        }
       })
     },
   });
@@ -114,6 +124,11 @@ const Login = ({ promptAsync, isSigningIn }) => {
       {formik.touched.password && formik.errors.password && (
         <ThemedText style={{ color: 'red' }}>{formik.errors.password}</ThemedText>
       )}
+
+      {loginError ? (
+        <ThemedText style={{ color: 'red', marginBottom: 10 }}>{loginError}</ThemedText>
+      ) : null}
+
 
       <View style={{ width: '80%', alignItems: 'flex-end' }}>
         <Link href="/">
