@@ -1,15 +1,11 @@
 // This will be the first page any user sees when they click on the app
-import {Text, StyleSheet,Pressable, Image, TextInput, View, TouchableOpacity, T } from 'react-native'
+import {Text, StyleSheet,Pressable, Image, View, TouchableOpacity} from 'react-native'
 import { useRouter } from 'expo-router';
 import {Link} from 'expo-router'
 import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import React, { useState } from 'react'; 
-import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
-import { useColorScheme } from 'react-native';
-
-
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
