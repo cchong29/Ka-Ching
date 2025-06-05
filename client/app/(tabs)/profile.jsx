@@ -4,9 +4,24 @@ import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { Alert } from 'react-native'; // already in your app
+
 
 export default function Profile() {
   const router = useRouter()
+  const signOut = async () => {
+    try {
+      await GoogleSignin.signOut(); // clear Google session
+      // Optionally: clear local data or tokens here
+      router.replace('/'); // redirect to login screen
+      console.log('Sign out successful')
+    } catch (error) {
+      console.log('Error signing out:', error);
+      Alert.alert('Sign Out Failed', 'Something went wrong during sign out.');
+    }
+  };  
+
   return (
     <ThemedView style={{ flex: 1, padding: 20 }}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -40,6 +55,7 @@ export default function Profile() {
         </Section>
 
         <TouchableOpacity
+          onPress={signOut}
           style={{
             backgroundColor: '#047857',
             paddingVertical: 14,
