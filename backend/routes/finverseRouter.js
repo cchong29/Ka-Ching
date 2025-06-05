@@ -59,5 +59,3 @@ router.get('/transactions/:account_id', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch transactions' });
   }
 });
-
-//test commit
