@@ -118,7 +118,13 @@ export default function Index() {
       if (idToken) {
         console.log('Sending request to backend...');
         
-        const baseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
+        const baseUrl =
+        process.env.EXPO_PUBLIC_ENV === 'production'
+          ? 'https://ka-ching.onrender.com'
+          : Platform.OS === 'android'
+          ? 'http://10.0.2.2:4000'
+          : 'http://localhost:4000';
+
         
         const res = await fetch(`${baseUrl}/auth/google-login`, {
           method: 'POST',

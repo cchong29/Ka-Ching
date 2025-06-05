@@ -5,7 +5,8 @@ import { useRouter } from 'expo-router';
 import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Platform } from 'react-native';
+import React, { useState } from 'react';
+
 
 
 // Themed Components
@@ -21,6 +22,8 @@ const baseUrl = 'https://ka-ching.onrender.com';
 
 
 const Register = () => {
+  const [registrationError, setRegistrationError] = useState('');
+
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: Yup.object({
@@ -33,7 +36,7 @@ const Register = () => {
     }),
     onSubmit: (values,actions) => {
       const vals = {...values}
-      actions.resetForm()
+      actions.resetForm();
       fetch(`${baseUrl}/auth/register`,{
         method: 'POST',
         credentials : 'include',
@@ -41,18 +44,26 @@ const Register = () => {
           'Content-Type' : 'application/json',
         },
         body : JSON.stringify(vals),
-      }).catch(err=>{
-        console.log('Registration failed:', err); 
-        return;
-      }).then(res=>{
-        if (!res || !res.ok || res.status >=400){
+      }).then(async (res) => {
+        const data = await res.json();
+  
+        if (!res.ok || res.status >= 400) {
+          console.log('Registration failed', res.status);
+          setRegistrationError(data.status || 'Try again');
           return;
-        } 
-        return res.json();
-      }).then(data=>{
-        if (!data) return;
-        router.push('/(tabs)/home');
+        }
+  
+        if (data.loggedIn) {
+          setRegistrationError(''); // Clear any previous error
+          router.push('/(tabs)/home');
+        } else {
+          setRegistrationError(data.status || 'Try again');
+        }
       })
+      .catch((err) => {
+        console.log('Registration failed:', err);
+        setRegistrationError('Registration error. Please try again later.');
+      });
     },
   });
 
@@ -90,6 +101,11 @@ const Register = () => {
         <ThemedText style={{ color: 'red' }}>{formik.errors.password}</ThemedText>
       )}
 
+      {registrationError !== '' && (
+        <ThemedText style={{ color: 'red', marginBottom: 10 }}>
+          {registrationError}
+        </ThemedText>
+      )}
 
       <ThemedButton onPress={formik.handleSubmit} style={{ width: '80%' }}>
         <ThemedText style={{ color: 'white', alignSelf: 'center' }}> Continue </ThemedText>

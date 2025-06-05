@@ -5,22 +5,45 @@ import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { Alert } from 'react-native'; // already in your app
+import { Alert } from 'react-native'; 
+import { Platform } from 'react-native';
 
 
 export default function Profile() {
   const router = useRouter()
+  const baseUrl =
+  process.env.EXPO_PUBLIC_ENV === 'production'
+    ? 'https://ka-ching.onrender.com'
+    : Platform.OS === 'android'
+    ? 'http://10.0.2.2:4000'
+    : 'http://localhost:4000';
+
   const signOut = async () => {
     try {
-      await GoogleSignin.signOut(); // clear Google session
-      // Optionally: clear local data or tokens here
-      router.replace('/'); // redirect to login screen
-      console.log('Sign out successful')
-    } catch (error) {
-      console.log('Error signing out:', error);
-      Alert.alert('Sign Out Failed', 'Something went wrong during sign out.');
+      // Sign out from Google if applicable
+      await GoogleSignin.signOut();
+      console.log('Google sign-out successful');
+    } catch (err) {
+      console.log('Google sign-out failed (non-Google user is fine)', err.message);
     }
-  };  
+  
+    try {
+      const res = await fetch(`${baseUrl}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+  
+      const data = await res.json();
+      if (data.loggedOut) {
+        router.replace('/(auth)/login');
+      } else {
+        Alert.alert('Logout Failed', 'Please try again.');
+      }
+    } catch (err) {
+      console.log('Error logging out:', err.message);
+      Alert.alert('Logout Error', 'Could not log out. Please try again.');
+    }
+  };
 
   return (
     <ThemedView style={{ flex: 1, padding: 20 }}>
