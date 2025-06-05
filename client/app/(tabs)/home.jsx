@@ -4,13 +4,17 @@ import { Ionicons } from '@expo/vector-icons';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
+import groceriesIcon from '@/assets/images/groceries-icon.png';
+import diningIcon from '@/assets/images/dining-icon.png';
+import transportIcon from '@/assets/images/transport-icon.png';
+import travelIcon from '@/assets/images/travel-icon.png';
 
 const dummyActivities = [
-  { id: 1, name: 'Starbucks', amount: 7.8 },
-  { id: 2, name: 'Starbucks', amount: 7.8 },
-  { id: 3, name: 'Starbucks', amount: 7.8 },
-  { id: 4, name: 'Starbucks', amount: 7.8 },
-];
+  { id: 1, name: 'Starbucks', amount: 7.8, icon: diningIcon },
+  { id: 2, name: 'Fairprice', amount: 53.6, icon: groceriesIcon },
+  { id: 3, name: 'Grab', amount: 16.2, icon: transportIcon },
+  { id: 4, name: 'Airbnb', amount: 658.5, icon: travelIcon },
+ ]; 
 
 const Home = () => {
   return (
