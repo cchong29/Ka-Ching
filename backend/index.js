@@ -1,57 +1,65 @@
-const express = require('express')
-const {Server} = require('socket.io');
-const app = express()
-const helmet = require('helmet')
-const cors = require('cors')
-const authrouter = require('./routes/authrouter')
-// const finverserouter = require('./routes/finverseRouter')
-const session = require("express-session");
+// Final version of backend index.js for Supabase + Render + Android compatibility
+const express = require('express');
+const { Server } = require('socket.io');
+const helmet = require('helmet');
+const cors = require('cors');
+const session = require('express-session');
+const authrouter = require('./routes/authrouter');
+const finverserouter = require('./routes/finverseRouter');
+require('dotenv').config();
 
-const server = require("http").createServer(app);
+const app = express();
+const server = require('http').createServer(app);
 
-// load env variables into this file
-require("dotenv").config()
+// Detect environment
+const ENV = process.env.ENVIRONMENT || 'development';
 
-const io = new Server(server,{
-    cors:{
-        origin : 'http://localhost:8081',
-        credentials : 'true',
+// Support both Expo run and downloaded APK access
+const FRONTEND_ORIGIN = [
+  'http://localhost:8081',      // Expo local dev
+  'http://10.0.2.2:8081',       // Android emulator
+  'exp://10.0.2.2:8081'         // Optional for Expo Go access
+];
 
-    }
-})
+const io = new Server(server, {
+  cors: {
+    origin: FRONTEND_ORIGIN,
+    credentials: true,
+  }
+});
 
-
-app.use(helmet())
+app.use(helmet());
 app.use(cors({
-        origin : 'http://localhost:8081',
-        credentials : 'true',
-        optionSuccessStatus : 200,
-    }))
+  origin: FRONTEND_ORIGIN,
+  credentials: true,
+  optionSuccessStatus: 200,
+}));
 
-app.use(express.json()) // receive JSON and treat it like javascript obj
+app.use(express.json());
 app.use(
-    session({
-        secret : process.env.COOKIE_SECRET,
-        credentials : true,
-        name : "sid",
-        resave : false, // doesn't save the session for no reason, only saves if sth changes
-        saveUninitialized : false,
-        cookie : {
-            secure : process.env.ENVIRONMENT === "production" ? "true" : "auto",
-            httpOnly : true,
-            sameSite : process.env.ENVIRONMENT === "production"? "none" : "lax",
-        }
-    })
-)
-app.use('/auth',authrouter)
-// app.use('/finverse',finverserouter);
+  session({
+    secret: process.env.COOKIE_SECRET,
+    credentials: true,
+    name: 'sid',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: ENV === 'production' ? 'true' : 'auto',
+      httpOnly: true,
+      sameSite: ENV === 'production' ? 'none' : 'lax',
+    },
+  })
+);
 
-app.get('/',(req,res)=>{
-    res.json('hi')
-})
+app.use('/auth', authrouter);
+// app.use('/finverse', finverserouter);
 
-io.on('connect',socket =>{})
+app.get('/', (req, res) => {
+  res.json('hi');
+});
 
-server.listen(4000,()=>{
-    console.log('Server listening on port 4000')
-})
+io.on('connect', (socket) => {});
+
+server.listen(4000, () => {
+  console.log('Server listening on port 4000');
+});

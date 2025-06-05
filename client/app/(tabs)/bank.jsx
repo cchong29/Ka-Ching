@@ -8,10 +8,21 @@ import { useRouter } from 'expo-router';
 
 export default function LinkBank() {
   const router = useRouter();
-  const handleConnect = () => {
+  const handleConnect = async () => {
     // Replace with actual bank linking flow e.g., Finverse SDK/webview
     alert('Bank connection flow triggered');
-  };
+    const tokenRes = await fetch(`${YOUR_BACKEND}/finverse/token`, { method: 'POST' });
+    const { access_token: customer_token } = await tokenRes.json();
+
+    const linkRes = await fetch(`${YOUR_BACKEND}/finverse/link-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customer_token })
+    });
+    const { link_url } = await linkRes.json();
+
+    router.push({ pathname: '/finverse', params: { url: link_url } });
+    };
 
   return (
     <ThemedView style={styles.container}>

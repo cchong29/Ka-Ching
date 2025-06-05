@@ -6,8 +6,6 @@ import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import React, { useState } from 'react'; 
-import { Platform } from 'react-native';
-
 
 
 // Themed Components
@@ -19,9 +17,7 @@ import ThemedButton from '@/components/ThemedButton'
 import ThemedLogo from '@/components/ThemedLogo'
 
 const router = useRouter();
-const baseUrl = Platform.OS === 'android'
-  ? 'http://10.0.2.2:4000'
-  : 'http://localhost:4000';
+const baseUrl = 'https://ka-ching.onrender.com'; 
 
 const Login = ({ promptAsync, isSigningIn }) => {
   const [loginError, setLoginError] = useState('');

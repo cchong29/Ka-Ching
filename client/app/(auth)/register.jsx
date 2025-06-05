@@ -17,9 +17,8 @@ import ThemedTextInput from '@/components/ThemedTextInput'
 import ThemedButton from '@/components/ThemedButton'
 
 const router = useRouter();
-const baseUrl = Platform.OS === 'android'
-  ? 'http://10.0.2.2:4000'
-  : 'http://localhost:4000';
+const baseUrl = 'https://ka-ching.onrender.com'; 
+
 
 const Register = () => {
   const formik = useFormik({
@@ -43,6 +42,7 @@ const Register = () => {
         },
         body : JSON.stringify(vals),
       }).catch(err=>{
+        console.log('Registration failed:', err); 
         return;
       }).then(res=>{
         if (!res || !res.ok || res.status >=400){
