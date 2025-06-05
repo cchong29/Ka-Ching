@@ -6,6 +6,9 @@ import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import React, { useState } from 'react'; 
+import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { useColorScheme } from 'react-native';
+
 
 
 // Themed Components
@@ -142,15 +145,32 @@ const Login = ({ promptAsync, isSigningIn }) => {
 
       <ThemedText>or</ThemedText>
 
-      <TouchableOpacity 
-        onPress={promptAsync} 
+      
+      <TouchableOpacity
+        onPress={promptAsync}
         disabled={isSigningIn}
-        style={{ opacity: isSigningIn ? 0.6 : 1 }}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent : 'center',
+          backgroundColor: '#EEEEEE',
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+          borderRadius: 8,
+          width: '80%',
+          marginTop: 10,
+        }}
       >
-        <ThemedText>
-          {isSigningIn ? 'Signing in...' : 'Continue with Google'}
-        </ThemedText>
-      </TouchableOpacity>
+      <Image
+        source={require('@/assets/images/google.png')}
+        style={{ width: 20, height: 20, marginRight: 12 }}
+      />
+      <Text style={{ color: '#000', fontWeight: '600' }}>
+        {isSigningIn ? 'Signing in...' : 'Continue with Google'}
+      </Text>
+    </TouchableOpacity>
+
+
 
       <Spacer height={100} />
 
