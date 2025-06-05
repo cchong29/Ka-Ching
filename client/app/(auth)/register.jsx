@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { Platform } from 'react-native';
 
 
 // Themed Components
@@ -16,6 +17,9 @@ import ThemedTextInput from '@/components/ThemedTextInput'
 import ThemedButton from '@/components/ThemedButton'
 
 const router = useRouter();
+const baseUrl = Platform.OS === 'android'
+  ? 'http://10.0.2.2:4000'
+  : 'http://localhost:4000';
 
 const Register = () => {
   const formik = useFormik({
@@ -31,7 +35,7 @@ const Register = () => {
     onSubmit: (values,actions) => {
       const vals = {...values}
       actions.resetForm()
-      fetch('http://192.168.68.108:4000/auth/register',{
+      fetch(`${baseUrl}/auth/register`,{
         method: 'POST',
         credentials : 'include',
         headers : {

@@ -6,6 +6,7 @@ import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import React, { useState } from 'react'; 
+import { Platform } from 'react-native';
 
 
 
@@ -18,6 +19,9 @@ import ThemedButton from '@/components/ThemedButton'
 import ThemedLogo from '@/components/ThemedLogo'
 
 const router = useRouter();
+const baseUrl = Platform.OS === 'android'
+  ? 'http://10.0.2.2:4000'
+  : 'http://localhost:4000';
 
 const Login = ({ promptAsync, isSigningIn }) => {
   const [loginError, setLoginError] = useState('');
@@ -35,7 +39,7 @@ const Login = ({ promptAsync, isSigningIn }) => {
     onSubmit: (values,actions) => {
       const vals = {...values}
       actions.resetForm()
-      fetch('http://192.168.68.108:4000/auth/login',{
+      fetch(`${baseUrl}/auth/login`,{
         method: 'POST',
         credentials : 'include',
         headers : {
@@ -71,7 +75,7 @@ const Login = ({ promptAsync, isSigningIn }) => {
 
   const fetchData = async () => {
     try {
-      const res = await fetch('http://192.168.68.108:4000/', {
+      const res = await fetch(`${baseUrl}`, {
         method: 'GET',
         credentials: 'include', // optional unless session is used
       });
