@@ -35,7 +35,7 @@ export default function Profile() {
   
       const data = await res.json();
       if (data.loggedOut) {
-        router.replace('/(auth)/login');
+        router.replace('/');
       } else {
         Alert.alert('Logout Failed', 'Please try again.');
       }
