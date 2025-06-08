@@ -7,7 +7,6 @@ import { useRouter } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { Alert } from 'react-native'; 
 import { Platform } from 'react-native';
-import ConsentText from '@/components/ConsentText';
 
 export default function Profile() {
   const router = useRouter()
