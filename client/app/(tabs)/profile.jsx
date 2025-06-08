@@ -8,7 +8,6 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { Alert } from 'react-native'; 
 import { Platform } from 'react-native';
 
-
 export default function Profile() {
   const router = useRouter()
   const baseUrl =
@@ -74,7 +73,7 @@ export default function Profile() {
         <Section title="Support and Legal">
           <Item icon={<AntDesign name="questioncircleo" size={20} />} label="Help & Feedback" />
           <Item icon={<Feather name="file-text" size={20} />} label="Terms of Service" onPress={() => router.push('/(auth)/t&c')} />
-          <Item icon={<Feather name="shield" size={20} />} label="Privacy Policy" />
+          <Item icon={<Feather name="shield" size={20} />} label="Privacy Policy" onPress={() => router.push('/(auth)/privacy')} />
         </Section>
 
         <TouchableOpacity

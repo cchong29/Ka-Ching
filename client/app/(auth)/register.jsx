@@ -7,7 +7,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import React, { useState } from 'react';
 import { Platform } from 'react-native';
-
+import ConsentText from '@/components/ConsentText';
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
@@ -116,15 +116,7 @@ const Register = () => {
         <ThemedText style={{ color: 'white', alignSelf: 'center' }}> Continue </ThemedText>
       </ThemedButton>
     
-
-    <Spacer height = {100} />
-
-    
-    <Link href = "/t&c">
-      <ThemedText style={{ textAlign: 'center', margin: 30, fontSize: 9 }}>
-        By clicking continue, you agree to our Terms of Service and Privacy Policy
-      </ThemedText>
-    </Link> 
+      <ConsentText /> 
 
     </ThemedView>
 
