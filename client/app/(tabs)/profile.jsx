@@ -7,8 +7,12 @@ import { useRouter } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { Alert } from 'react-native'; 
 import { Platform } from 'react-native';
+import { useColorScheme } from 'react-native';
+import React from 'react';
 
 export default function Profile() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme] ?? Colors.light;
   const router = useRouter()
   const baseUrl =
   process.env.EXPO_PUBLIC_ENV === 'production'
@@ -55,7 +59,7 @@ export default function Profile() {
           <ThemedText title style={{ fontSize: 20, fontWeight: '600', marginTop: 12 }}>
             John Doe
           </ThemedText>
-          <ThemedText style={{ marginTop: 4, color: '#6B7280' }}>
+          <ThemedText style={{ marginTop: 4, color: theme.icon }}>
             johndoe@gmail.com
           </ThemedText>
         </View>
@@ -94,32 +98,61 @@ export default function Profile() {
 }
 
 function Section({ title, children }) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme] ?? Colors.light;
+
   return (
     <View style={{ marginTop: 30 }}>
-      <ThemedText style={{ marginBottom: 12, fontWeight: '600' }}>{title}</ThemedText>
-      <View style={{ backgroundColor: '#f1f5f9', borderRadius: 12, overflow: 'hidden' }}>
-        {children}
-      </View>
+      <ThemedText
+        style={{
+          marginBottom: 12,
+          fontWeight: '700',
+          fontSize: 18,
+          color: theme.title,
+        }}
+      >
+        {title}
+      </ThemedText>
+      <View>{children}</View>
     </View>
   );
 }
 
 function Item({ icon, label, onPress }) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme] ?? Colors.light;
+
   return (
     <TouchableOpacity
       onPress={onPress}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: theme.uibackground,
         paddingVertical: 14,
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
+        borderRadius: 12,
+        marginBottom: 12,
+
+        // Shadow for iOS
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 6,
+
+        // Elevation for Android
+        elevation: 2,
       }}
     >
-      <View style={{ marginRight: 12 }}>{icon}</View>
+      <View style={{ marginRight: 12 }}>
+        {React.cloneElement(icon, { color: theme.icon })}
+      </View>
       <ThemedText style={{ fontSize: 16 }}>{label}</ThemedText>
-      <Ionicons name="chevron-forward" size={18} style={{ marginLeft: 'auto', color: Colors.primary }} />
+      <Ionicons
+        name="chevron-forward"
+        size={18}
+        style={{ marginLeft: 'auto', color: Colors.primary }}
+      />
     </TouchableOpacity>
   );
 }
