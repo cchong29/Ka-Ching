@@ -8,6 +8,7 @@ import groceriesIcon from '@/assets/images/groceries-icon.png';
 import diningIcon from '@/assets/images/dining-icon.png';
 import transportIcon from '@/assets/images/transport-icon.png';
 import travelIcon from '@/assets/images/travel-icon.png';
+import { supabase } from "../../lib/supabase";
 
 const dummyActivities = [
   { id: 1, name: 'Starbucks', amount: 7.8, icon: diningIcon },
@@ -17,10 +18,28 @@ const dummyActivities = [
  ]; 
 
 const Home = () => {
+
+  const [username, setUsername] = useState("");
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const {
+                data: { session },
+            } = await supabase.auth.getSession();
+            const email = session?.user?.email;
+            if (email) {
+                const name = email.split("@")[0];
+                setUsername(name);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
   return (
     <ThemedView style={styles.container}>
       {/* Top bar */}
-        <ThemedText title style={styles.welcomeText}>Hello, John!</ThemedText>
+        <ThemedText title style={styles.welcomeText}>{username}</ThemedText>
 
       {/* Total Balance */}
       <View style={styles.balanceCard}>
