@@ -6,8 +6,8 @@ import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import React, { useState } from 'react';
-
-
+import { Platform } from 'react-native';
+import ConsentText from '@/components/ConsentText';
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
@@ -18,7 +18,12 @@ import ThemedTextInput from '@/components/ThemedTextInput'
 import ThemedButton from '@/components/ThemedButton'
 
 const router = useRouter();
-const baseUrl = 'https://ka-ching.onrender.com'; 
+const baseUrl =
+  process.env.EXPO_PUBLIC_ENV === 'production'
+    ? 'https://ka-ching.onrender.com'
+    : Platform.OS === 'android'
+    ? 'http://10.0.2.2:4000'
+    : 'http://localhost:4000';
 
 
 const Register = () => {
@@ -111,15 +116,7 @@ const Register = () => {
         <ThemedText style={{ color: 'white', alignSelf: 'center' }}> Continue </ThemedText>
       </ThemedButton>
     
-
-    <Spacer height = {100} />
-
-    
-    <Link href = "/t&c">
-      <ThemedText style={{ textAlign: 'center', margin: 30, fontSize: 9 }}>
-        By clicking continue, you agree to our Terms of Service and Privacy Policy
-      </ThemedText>
-    </Link> 
+      <ConsentText /> 
 
     </ThemedView>
 

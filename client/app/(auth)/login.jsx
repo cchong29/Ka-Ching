@@ -6,6 +6,9 @@ import {Colors} from '@/constants/Colors'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import React, { useState } from 'react'; 
+import { Platform } from 'react-native';
+import ConsentText from '@/components/ConsentText';
+import { useColorScheme } from 'react-native';
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
@@ -16,10 +19,17 @@ import ThemedButton from '@/components/ThemedButton'
 import ThemedLogo from '@/components/ThemedLogo'
 
 const router = useRouter();
-const baseUrl = 'https://ka-ching.onrender.com'; 
+const baseUrl =
+  process.env.EXPO_PUBLIC_ENV === 'production'
+    ? 'https://ka-ching.onrender.com'
+    : Platform.OS === 'android'
+    ? 'http://10.0.2.2:4000'
+    : 'http://localhost:4000'; 
 
 const Login = ({ promptAsync, isSigningIn }) => {
   const [loginError, setLoginError] = useState('');
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme] ?? Colors.light;
 
   const formik = useFormik({
     initialValues: { email: '', password: '' },
@@ -101,25 +111,39 @@ const Login = ({ promptAsync, isSigningIn }) => {
       <Spacer />
 
       <ThemedTextInput
-        style={{ width: '80%', marginBottom: 5 }}
-        placeholder="Email address"
-        keyboardType="email-address"
-        onChangeText={formik.handleChange('email')}
-        onBlur={formik.handleBlur('email')}
-        value={formik.values.email}
-      />
+        style={{
+        width: '80%',
+        marginBottom: 5,
+        borderColor: theme.icon,
+        borderWidth: 1,
+        borderRadius: 6,
+      }}
+      placeholder="Email address"
+      keyboardType="email-address"
+      onChangeText={formik.handleChange('email')}
+      onBlur={formik.handleBlur('email')}
+      value={formik.values.email}
+    />
+
       {formik.touched.email && formik.errors.email && (
         <ThemedText style={{ color: 'red' }}>{formik.errors.email}</ThemedText>
       )}
 
       <ThemedTextInput
-        style={{ width: '80%', marginBottom: 5 }}
+        style={{
+          width: '80%',
+          marginBottom: 5,
+          borderColor: theme.icon,
+          borderWidth: 1,
+          borderRadius: 6,
+        }}
         placeholder="Password"
         secureTextEntry
         onChangeText={formik.handleChange('password')}
         onBlur={formik.handleBlur('password')}
         value={formik.values.password}
       />
+
       {formik.touched.password && formik.errors.password && (
         <ThemedText style={{ color: 'red' }}>{formik.errors.password}</ThemedText>
       )}
@@ -166,21 +190,18 @@ const Login = ({ promptAsync, isSigningIn }) => {
       </Text>
     </TouchableOpacity>
 
-
-
-      <Spacer height={100} />
-
-      <Link href = "/t&c">
-      <ThemedText style={{ textAlign: 'center', margin: 30, fontSize: 9 }}>
-        By clicking continue, you agree to our Terms of Service and Privacy Policy
-      </ThemedText>
-      </Link>
-
+    <ConsentText />
+    
+    <Spacer/>
+    
+    <ThemedText style={{ textAlign: 'center' }}>
+      Don't have an account?{' '}
       <Link href="/register">
-        <ThemedText style={{ textAlign: 'center' }}>
-          Don't have an account? Sign up
-        </ThemedText>
+        <Text style={{ color: '#137547', fontWeight: '700', textDecorationLine: 'underline' }}>
+          Sign up
+        </Text>
       </Link>
+    </ThemedText>
     </ThemedView>
   );
 };
