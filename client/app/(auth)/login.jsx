@@ -155,7 +155,9 @@ const Login = ({ promptAsync, isSigningIn }) => {
 
       <View style={{ width: '80%', alignItems: 'flex-end' }}>
         <Link href="/">
-          <ThemedText> Forgot Password?</ThemedText>
+        <ThemedText style={{ textDecorationLine: 'underline' }}>
+          Forgot Password?
+        </ThemedText>
         </Link>
       </View>
 
