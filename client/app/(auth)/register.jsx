@@ -118,6 +118,17 @@ const Register = () => {
     
       <ConsentText /> 
 
+      <Spacer/>
+    
+    <ThemedText style={{ textAlign: 'center' }}>
+      Have an account already?{' '}
+      <Link href="/login">
+        <Text style={{ color: '#137547', fontWeight: '700', textDecorationLine: 'underline' }}>
+          Log in
+        </Text>
+      </Link>
+    </ThemedText>
+
     </ThemedView>
 
 
