@@ -8,6 +8,7 @@ import * as Yup from 'yup';
 import React, { useState } from 'react';
 import { Platform } from 'react-native';
 import ConsentText from '@/components/ConsentText';
+import { Alert } from 'react-native';
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
