@@ -42,6 +42,7 @@ const Register = () => {
     onSubmit: (values,actions) => {
       const vals = {...values}
       actions.resetForm();
+      
       fetch(`${baseUrl}/auth/register`,{
         method: 'POST',
         credentials : 'include',
@@ -51,24 +52,25 @@ const Register = () => {
         body : JSON.stringify(vals),
       }).then(async (res) => {
         const data = await res.json();
-  
-        if (!res.ok || res.status >= 400) {
-          console.log('Registration failed', res.status);
-          setRegistrationError(data.status || 'Try again');
+      
+        if (data.error) {
+          console.log('Registration failed', data.error);
+          setRegistrationError(data.error || 'Try again');
           return;
         }
-  
+      
         if (data.loggedIn) {
-          setRegistrationError(''); // Clear any previous error
-          router.push('/(tabs)/home');
+          Alert.alert(
+            "Success",
+            "Check your email for the confirmation link!",
+            [{ text: "OK", onPress: () => router.replace("/login") }]
+          );
         } else {
           setRegistrationError(data.status || 'Try again');
         }
       })
-      .catch((err) => {
-        console.log('Registration failed:', err);
-        setRegistrationError('Registration error. Please try again later.');
-      });
+      
+      
     },
   });
 

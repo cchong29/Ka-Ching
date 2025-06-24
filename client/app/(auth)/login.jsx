@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { Platform } from 'react-native';
 import ConsentText from '@/components/ConsentText';
 import { useColorScheme } from 'react-native';
+import { supabase } from '../../lib/supabase';
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
@@ -24,7 +25,7 @@ const baseUrl =
     ? 'https://ka-ching.onrender.com'
     : Platform.OS === 'android'
     ? 'http://10.0.2.2:4000'
-    : 'http://localhost:4000'; 
+    : 'http://localhost:4000';
 
 const Login = ({ promptAsync, isSigningIn }) => {
   const [loginError, setLoginError] = useState('');
@@ -41,36 +42,25 @@ const Login = ({ promptAsync, isSigningIn }) => {
         .min(6, 'Password must be at least 6 characters')
         .required('Password is required'),
     }),
-    onSubmit: (values,actions) => {
-      const vals = {...values}
-      actions.resetForm()
-      fetch(`${baseUrl}/auth/login`,{
-        method: 'POST',
-        credentials : 'include',
-        headers : {
-          'Content-Type' : 'application/json',
-        },
-        body : JSON.stringify(vals),
-      }).catch(err=>{
-        console.log(err);
-        setLoginError('Network error. Please try again.');
+    onSubmit: async (values, actions) => {
+      actions.resetForm();
+      const { email, password } = values;
+    
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+    
+      if (error) {
+        console.log('Login error:', error);
+        setLoginError(error.message || 'Login failed.');
         return;
-      }).then(res=>{
-        if (!res || !res.ok || res.status >=400){
-          setLoginError('Something went wrong.');
-          return;
-        } 
-        return res.json();
-      }).then(data=>{
-        if (data.loggedIn) 
-        {
-          setLoginError('');
-          router.push('/(tabs)/home')
-        }
-        else {
-          setLoginError(data.status || 'Login failed.'); 
-        }
-      })
+      }
+    
+      console.log('✅ Login success:', data);
+    
+      setLoginError('');
+      router.push('/(tabs)/home');
     },
   });
 

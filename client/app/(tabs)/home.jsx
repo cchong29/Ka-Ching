@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Image, useColorScheme } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Platform, Image, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
+
+import { supabase } from "../../lib/supabase";
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState, useEffect } from 'react';
+
 
 const dummyActivities = [
   { id: 1, name: 'Starbucks', amount: 7.8, icon: 'food-bank' }, 
@@ -14,7 +18,38 @@ const dummyActivities = [
   { id: 4, name: 'Airbnb', amount: 658.5, icon: 'flight' }, 
 ];
 
+ const baseUrl =
+  process.env.EXPO_PUBLIC_ENV === 'production'
+    ? 'https://ka-ching.onrender.com'
+    : Platform.OS === 'android'
+    ? 'http://10.0.2.2:4000'
+    : 'http://localhost:4000';
+
 const Home = () => {
+
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (accessToken) {
+        const res = await fetch(`${baseUrl}/user/username`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        const json = await res.json();
+        setUsername(json.name);
+      }
+
+    };
+  
+    fetchUserName();
+  }, []);
+
+  
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
 
@@ -22,9 +57,10 @@ const Home = () => {
   const iconColor = colorScheme === 'dark' ? '#FFFFFF' : '#333333'; // white for dark, black/grey for light
 
   return (
+    
     <SafeAreaView style={{ flex: 1 }}>
       <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
-        <ThemedText title style={styles.welcomeText}>Hello, John!</ThemedText>
+        <ThemedText title style={styles.welcomeText}>Hello {username}!</ThemedText>
 
         {/* Total Balance */}
         <View style={[styles.balanceCard, { backgroundColor: containerBg }]}>
