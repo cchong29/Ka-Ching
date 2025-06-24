@@ -7,7 +7,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import React, { useState } from 'react';
 import { Platform } from 'react-native';
-
+import ConsentText from '@/components/ConsentText';
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
@@ -24,6 +24,7 @@ const baseUrl =
     : Platform.OS === 'android'
     ? 'http://10.0.2.2:4000'
     : 'http://localhost:4000';
+
 
 const Register = () => {
   const [registrationError, setRegistrationError] = useState('');
@@ -117,15 +118,18 @@ const Register = () => {
         <ThemedText style={{ color: 'white', alignSelf: 'center' }}> Continue </ThemedText>
       </ThemedButton>
     
+      <ConsentText /> 
 
-    <Spacer height = {100} />
-
+      <Spacer/>
     
-    <Link href = "/t&c">
-      <ThemedText style={{ textAlign: 'center', margin: 30, fontSize: 9 }}>
-        By clicking continue, you agree to our Terms of Service and Privacy Policy
-      </ThemedText>
-    </Link> 
+    <ThemedText style={{ textAlign: 'center' }}>
+      Have an account already?{' '}
+      <Link href="/login">
+        <Text style={{ color: '#137547', fontWeight: '700', textDecorationLine: 'underline' }}>
+          Log in
+        </Text>
+      </Link>
+    </ThemedText>
 
     </ThemedView>
 
