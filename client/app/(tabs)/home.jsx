@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
@@ -9,6 +9,7 @@ import diningIcon from '@/assets/images/dining-icon.png';
 import transportIcon from '@/assets/images/transport-icon.png';
 import travelIcon from '@/assets/images/travel-icon.png';
 import { supabase } from "../../lib/supabase";
+import { useState, useEffect } from 'react';
 
 const dummyActivities = [
   { id: 1, name: 'Starbucks', amount: 7.8, icon: diningIcon },
@@ -17,29 +18,43 @@ const dummyActivities = [
   { id: 4, name: 'Airbnb', amount: 658.5, icon: travelIcon },
  ]; 
 
+ const baseUrl =
+  process.env.EXPO_PUBLIC_ENV === 'production'
+    ? 'https://ka-ching.onrender.com'
+    : Platform.OS === 'android'
+    ? 'http://10.0.2.2:4000'
+    : 'http://localhost:4000';
+
 const Home = () => {
 
   const [username, setUsername] = useState("");
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const {
-                data: { session },
-            } = await supabase.auth.getSession();
-            const email = session?.user?.email;
-            if (email) {
-                const name = email.split("@")[0];
-                setUsername(name);
-            }
-        };
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (accessToken) {
+        const res = await fetch(`${baseUrl}/user/username`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        const json = await res.json();
+        setUsername(json.name);
+      }
 
-        fetchUser();
-    }, []);
+    };
+  
+    fetchUserName();
+  }, []);
+  
+  
 
   return (
     <ThemedView style={styles.container}>
       {/* Top bar */}
-        <ThemedText title style={styles.welcomeText}>{username}</ThemedText>
+        <ThemedText title style={styles.welcomeText}>Hello {username}!</ThemedText>
 
       {/* Total Balance */}
       <View style={styles.balanceCard}>
