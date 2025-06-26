@@ -9,8 +9,34 @@ import { Alert } from 'react-native';
 import { Platform } from 'react-native';
 import { useColorScheme } from 'react-native';
 import React from 'react';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { supabase } from "../../lib/supabase";
+
 
 export default function Profile() {
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (accessToken) {
+        const res = await fetch(`${baseUrl}/user/username`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        const json = await res.json();
+        setUsername(json.name);
+      }
+
+    };
+  
+    fetchUserName();
+  }, []);
+
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
   const router = useRouter()
@@ -57,10 +83,10 @@ export default function Profile() {
             style={{ width: 100, height: 100, borderRadius: 50 }}
           />
           <ThemedText title style={{ fontSize: 20, fontWeight: '600', marginTop: 12 }}>
-            John Doe
+            {username}
           </ThemedText>
           <ThemedText style={{ marginTop: 4, color: theme.icon }}>
-            johndoe@gmail.com
+            {username}@gmail.com
           </ThemedText>
         </View>
 
