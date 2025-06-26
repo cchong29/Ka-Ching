@@ -10,13 +10,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 
-
-const dummyActivities = [
-  { id: 1, name: 'Starbucks', amount: 7.8, icon: 'food-bank' }, 
-  { id: 2, name: 'Fairprice', amount: 53.6, icon: 'local-grocery-store' },
-  { id: 3, name: 'Grab', amount: 16.2, icon: 'emoji-transportation' },
-  { id: 4, name: 'Airbnb', amount: 658.5, icon: 'flight' }, 
-];
+const iconMap = {
+  Food: 'food-bank',
+  Grocery: 'local-grocery-store',
+  Transport: 'emoji-transportation',
+  Travel: 'flight',
+  // Add more category-to-icon mappings
+};
 
  const baseUrl =
   process.env.EXPO_PUBLIC_ENV === 'production'
@@ -25,88 +25,122 @@ const dummyActivities = [
     ? 'http://10.0.2.2:4000'
     : 'http://localhost:4000';
 
-const Home = () => {
-
-  const [username, setUsername] = useState("");
-
-  useEffect(() => {
-    const fetchUserName = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-      if (accessToken) {
-        const res = await fetch(`${baseUrl}/user/username`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-        const json = await res.json();
-        setUsername(json.name);
-      }
-
-    };
+  const Home = () => {
+    const [username, setUsername] = useState('');
+    const [expenses, setExpenses] = useState([]);
+    const colorScheme = useColorScheme();
+    const theme = Colors[colorScheme] ?? Colors.light;
   
-    fetchUserName();
-  }, []);
-
+    useEffect(() => {
+      // Fetch username (your existing code)
+      const fetchUserName = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        const accessToken = session?.access_token;
+        if (accessToken) {
+          const res = await fetch(`${baseUrl}/user/username`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          const json = await res.json();
+          setUsername(json.name);
+        }
+      };
   
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme] ?? Colors.light;
-
-  const containerBg = colorScheme === 'dark' ? '#2f2b3d' : '#fff'; // your themed container bg
-  const iconColor = colorScheme === 'dark' ? '#FFFFFF' : '#333333'; // white for dark, black/grey for light
-
-  return (
+      fetchUserName();
+    }, []);
+  
+    useEffect(() => {
+      const fetchExpenses = async () => {
+        const { data, error: userError } = await supabase.auth.getUser();
+        const user = data?.user;
     
-    <SafeAreaView style={{ flex: 1 }}>
-      <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
-        <ThemedText title style={styles.welcomeText}>Hello {username}!</ThemedText>
+        if (userError || !user) {
+          console.error('User not logged in or error fetching user:', userError);
+          return;
+        }
+    
+        console.log("✅ Fetching expenses for user:", user.id);
+    
+        const { data: expensesData, error } = await supabase
+          .from('expenses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false });
+    
+        if (error) {
+          console.error('❌ Error fetching expenses:', error.message);
+        } else {
+          console.log("📦 Expenses fetched:", expensesData);
+          setExpenses(expensesData);
+        }
+      };
+    
+      fetchExpenses();
+    }, []);
 
-        {/* Total Balance */}
-        <View style={[styles.balanceCard, { backgroundColor: containerBg }]}>
-          <View>
-            <ThemedText>Total Balance</ThemedText>
-            <ThemedText style={styles.balanceText}>$5,038.24</ThemedText>
-          </View>
-          <TouchableOpacity style={styles.addBtn}>
-            <Ionicons name="add" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Graph & Bills */}
-        <View style={styles.sectionRow}>
-          <View style={[styles.smallCard, { backgroundColor: containerBg }]}>
-            <ThemedText>This Month</ThemedText>
-            <View style={[styles.fakeGraph, { backgroundColor: colorScheme === 'dark' ? '#3a3f47' : '#d0f0d0' }]} />
-          </View>
-          <View style={[styles.smallCard, { backgroundColor: containerBg }]}>
-            <ThemedText>Bills Due</ThemedText>
-            <ThemedText style={styles.greenText}>3 items</ThemedText>
-          </View>
-        </View>
-
-        {/* Recent Activity */}
-        <ThemedText title style={styles.recentTitle}>Recent Activity</ThemedText>
-        <FlatList
-          data={dummyActivities}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={[styles.activityItem, { backgroundColor: containerBg }]}>
-              <View style={styles.activityLeft}>
-                <MaterialIcons name={item.icon} size={24} color={iconColor} style={{ marginRight: 10 }} />
-                <ThemedText>{item.name}</ThemedText>
-              </View>
-              <View style={styles.activityRight}>
-                <ThemedText>${item.amount.toFixed(2)}</ThemedText>
-                <Ionicons name="chevron-forward" size={16} color={theme.icon} />
-              </View>
+    const containerBg = colorScheme === 'dark' ? '#2f2b3d' : '#fff';
+    const iconColor = colorScheme === 'dark' ? '#FFFFFF' : '#333333';
+  
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
+          <ThemedText title style={styles.welcomeText}>Hello {username}!</ThemedText>
+  
+          <View style={[styles.balanceCard, { backgroundColor: containerBg }]}>
+            <View>
+              <ThemedText>Total Balance</ThemedText>
+              <ThemedText style={styles.balanceText}>$5,038.24</ThemedText>
             </View>
-          )}
-        />
-      </ThemedView>
-    </SafeAreaView>
-  );
-};
+            <TouchableOpacity style={styles.addBtn}>
+              <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+  
+          <View style={styles.sectionRow}>
+            <View style={[styles.smallCard, { backgroundColor: containerBg }]}>
+              <ThemedText>This Month</ThemedText>
+              <View style={[styles.fakeGraph, { backgroundColor: colorScheme === 'dark' ? '#3a3f47' : '#d0f0d0' }]} />
+            </View>
+            <View style={[styles.smallCard, { backgroundColor: containerBg }]}>
+              <ThemedText>Bills Due</ThemedText>
+              <ThemedText style={styles.greenText}>3 items</ThemedText>
+            </View>
+          </View>
+  
+          <ThemedText title style={styles.recentTitle}>Recent Activity</ThemedText>
+          <FlatList
+            data={expenses}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={[styles.activityItem, { backgroundColor: containerBg }]}>
+                <View style={styles.activityLeft}>
+                  <MaterialIcons
+                    name={iconMap[item.category] || 'payment'} // fallback icon
+                    size={24}
+                    color={iconColor}
+                    style={{ marginRight: 10 }}
+                  />
+                  <View>
+                    <ThemedText>{item.title || item.category}</ThemedText>
+                    <ThemedText style={{ fontSize: 12, color: 'gray' }}>{item.category}</ThemedText>
+                  </View>
+                </View>
+                <View style={styles.activityRight}>
+                  <ThemedText>${item.amount.toFixed(2)}</ThemedText>
+                  <Ionicons name="chevron-forward" size={16} color={theme.icon} />
+                </View>
+              </View>
+            )}
+            ListEmptyComponent={
+              <ThemedText style={{ textAlign: 'center', marginTop: 20 }}>
+                No expenses found.
+              </ThemedText>
+            }
+          />
+        </ThemedView>
+      </SafeAreaView>
+    );
+  };
 
 export default Home;
 

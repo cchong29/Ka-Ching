@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, Platform, useColorScheme } from 'react-native';
+import { StyleSheet, TouchableOpacity, Platform, useColorScheme, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+import { Alert } from 'react-native';
+import ModalSelector from 'react-native-modal-selector';
 
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
@@ -20,9 +23,53 @@ const AddExpense = () => {
   const [date, setDate] = useState(new Date());
   const [note, setNote] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [title, setTitle] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    console.log('handleSave called');
     console.log({ amount, category, date, note });
+  
+    const cleanAmount = amount.replace(/[^0-9.]/g, '');
+    const parsedAmount = parseFloat(cleanAmount);
+    if (isNaN(parsedAmount)) {
+      Alert.alert('Invalid amount', 'Please enter a valid number for amount.');
+      return;
+    }
+  
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+    console.log('User info:', user);
+  
+    if (userError || !user) {
+      Alert.alert('Authentication Error', 'You must be logged in.');
+      return;
+    }
+  
+    const { error } = await supabase.from('expenses').insert([
+      {
+        title,
+        amount: parseFloat(amount),
+        category,
+        date: date.toISOString(),
+        note,
+        user_id: user.id,
+      },
+    ]);
+  
+    if (error) {
+      Alert.alert('Error', 'Failed to save expense.');
+      console.error('Supabase insert error:', error.message);
+      return;
+    }
+  
+    setAmount('');
+    setCategory('');
+    setDate(new Date());
+    setNote('');
+    setTitle('');
+    setSuccessMessage('✅ Expense saved!');
+    setTimeout(() => setSuccessMessage(''), 2000);
   };
 
   return (
@@ -42,11 +89,45 @@ const AddExpense = () => {
       />
 
       <ThemedTextInput
-        placeholder="Select Category"
-        value={category}
-        onChangeText={setCategory}
+        placeholder="Title"
+        value={title}
+        onChangeText={setTitle}
         style={[styles.input, { borderColor: theme.icon }]}
       />
+
+      
+      <View style={[styles.dateInput, { backgroundColor: theme.uibackground, borderColor: theme.icon, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+        <ModalSelector
+          data={[
+            { key: 'Food', label: 'Food' },
+            { key: 'Grocery', label: 'Grocery' },
+            { key: 'Transport', label: 'Transport' },
+            { key: 'Travel', label: 'Travel' },
+            { key: 'Bills', label: 'Bills' },
+            { key: 'Shopping', label: 'Shopping' },
+          ]}
+          initValue="Select a category"
+          onChange={(option) => setCategory(option.key)}
+          animationType="fade"
+          optionTextStyle={{ color: theme.text }}
+          optionContainerStyle={{ backgroundColor: theme.background, borderRadius: 10, }}
+          cancelStyle={{ backgroundColor: theme.background }}
+          cancelTextStyle={{ color: theme.text }}
+          initValueTextStyle={{
+            color: category ? theme.text : '#999999', 
+            fontSize: 16,
+          }}
+          selectTextStyle={{
+            color: theme.text,
+            fontSize: 16,
+          }}
+          style={{ flex: 1 }}
+        >
+          <ThemedText>{category || 'Select a category'}</ThemedText>
+        </ModalSelector>
+
+        <Ionicons name="chevron-down" size={20} color={theme.icon} />
+      </View>
 
       <TouchableOpacity
         style={[
@@ -82,6 +163,12 @@ const AddExpense = () => {
         numberOfLines={3}
         style={[styles.input, { height: 80, borderColor: theme.icon }]}
       />
+
+      {successMessage !== '' && (
+        <ThemedText style={{ color: 'green', textAlign: 'center', marginBottom: 10 }}>
+          {successMessage}
+        </ThemedText>
+      )}
 
       <ThemedButton onPress={handleSave}>
         <ThemedText style={styles.btnText}>Save Expense</ThemedText>
