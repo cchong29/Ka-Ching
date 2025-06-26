@@ -1,14 +1,15 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Platform, Image, useColorScheme } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Platform, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { supabase } from "../../lib/supabase";
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const iconMap = {
   Food: 'food-bank',
@@ -25,32 +26,31 @@ const iconMap = {
     ? 'http://10.0.2.2:4000'
     : 'http://localhost:4000';
 
-  const Home = () => {
-    const [username, setUsername] = useState('');
-    const [expenses, setExpenses] = useState([]);
-    const colorScheme = useColorScheme();
-    const theme = Colors[colorScheme] ?? Colors.light;
-  
-    useEffect(() => {
-      // Fetch username (your existing code)
-      const fetchUserName = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        const accessToken = session?.access_token;
-        if (accessToken) {
-          const res = await fetch(`${baseUrl}/user/username`, {
-            method: "GET",
-            headers: { Authorization: `Bearer ${accessToken}` }
-          });
-          const json = await res.json();
-          setUsername(json.name);
-        }
-      };
-  
-      fetchUserName();
-    }, []);
-  
-    useEffect(() => {
-      const fetchExpenses = async () => {
+    const Home = ({ navigation }) => {
+      const [username, setUsername] = useState('');
+      const [expenses, setExpenses] = useState([]);
+      const colorScheme = useColorScheme();
+      const theme = Colors[colorScheme] ?? Colors.light;
+    
+      useEffect(() => {
+        const fetchUserName = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          const accessToken = session?.access_token;
+          if (accessToken) {
+            const res = await fetch(`${baseUrl}/user/username`, {
+              method: 'GET',
+              headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            const json = await res.json();
+            setUsername(json.name);
+          }
+        };
+    
+        fetchUserName();
+      }, []);
+    
+      // Fetch expenses when focused
+      const fetchExpenses = useCallback(async () => {
         const { data, error: userError } = await supabase.auth.getUser();
         const user = data?.user;
     
@@ -58,8 +58,6 @@ const iconMap = {
           console.error('User not logged in or error fetching user:', userError);
           return;
         }
-    
-        console.log("✅ Fetching expenses for user:", user.id);
     
         const { data: expensesData, error } = await supabase
           .from('expenses')
@@ -70,13 +68,15 @@ const iconMap = {
         if (error) {
           console.error('❌ Error fetching expenses:', error.message);
         } else {
-          console.log("📦 Expenses fetched:", expensesData);
           setExpenses(expensesData);
         }
-      };
+      }, []);
     
-      fetchExpenses();
-    }, []);
+      useFocusEffect(
+        useCallback(() => {
+          fetchExpenses();
+        }, [fetchExpenses])
+      );
 
     const containerBg = colorScheme === 'dark' ? '#2f2b3d' : '#fff';
     const iconColor = colorScheme === 'dark' ? '#FFFFFF' : '#333333';

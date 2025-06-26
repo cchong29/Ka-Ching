@@ -27,9 +27,6 @@ const AddExpense = () => {
   const [title, setTitle] = useState('');
 
   const handleSave = async () => {
-    console.log('handleSave called');
-    console.log({ amount, category, date, note });
-  
     const cleanAmount = amount.replace(/[^0-9.]/g, '');
     const parsedAmount = parseFloat(cleanAmount);
     if (isNaN(parsedAmount)) {
@@ -39,8 +36,6 @@ const AddExpense = () => {
   
     const { data: { user }, error: userError } = await supabase.auth.getUser();
   
-    console.log('User info:', user);
-  
     if (userError || !user) {
       Alert.alert('Authentication Error', 'You must be logged in.');
       return;
@@ -49,7 +44,7 @@ const AddExpense = () => {
     const { error } = await supabase.from('expenses').insert([
       {
         title,
-        amount: parseFloat(amount),
+        amount: parsedAmount,
         category,
         date: date.toISOString(),
         note,
@@ -69,7 +64,10 @@ const AddExpense = () => {
     setNote('');
     setTitle('');
     setSuccessMessage('✅ Expense saved!');
-    setTimeout(() => setSuccessMessage(''), 2000);
+
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 2000);
   };
 
   return (
@@ -105,6 +103,7 @@ const AddExpense = () => {
             { key: 'Travel', label: 'Travel' },
             { key: 'Bills', label: 'Bills' },
             { key: 'Shopping', label: 'Shopping' },
+            { key: 'Others', label: 'Others' },
           ]}
           initValue="Select a category"
           onChange={(option) => setCategory(option.key)}
