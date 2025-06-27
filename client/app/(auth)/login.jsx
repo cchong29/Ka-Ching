@@ -57,7 +57,7 @@ const Login = ({ promptAsync, isSigningIn }) => {
         return;
       }
     
-      console.log('✅ Login success:', data);
+      console.log('✅ Login success:');
     
       setLoginError('');
       router.push('/(tabs)/home');

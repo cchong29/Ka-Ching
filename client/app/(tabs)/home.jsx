@@ -49,6 +49,14 @@ const Home = () => {
     fetchUserName();
   }, []);
 
+  // Function for displaying expenses
+  const getTransactions= async () => {
+    const TransactionsRes = await fetch(`${baseUrl}/finverse/link-token`, {
+      method: 'GET',
+      
+    });
+    
+  }
   
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
