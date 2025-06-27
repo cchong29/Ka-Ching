@@ -2,6 +2,9 @@
 import { WebView } from "react-native-webview";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Platform } from "react-native";
+import { useEffect } from "react";
+import { Linking } from "react-native";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const baseUrl =
@@ -14,26 +17,52 @@ const baseUrl =
 export default function WebviewScreen() {
   const router = useRouter();
   const { url } = useLocalSearchParams();
+
   console.log("Linked to Finverse UI");
+
+  // Handle deep link when returning from authentication
+  useEffect(() => {
+    const handleDeepLink = async (url) => {
+      if (url.includes("finverse-success")) {
+        const urlObj = new URL(url);
+        const token = urlObj.searchParams.get("token");
+
+        if (token) {
+          await AsyncStorage.setItem("finverse_token", token);
+          router.push("/(tabs)/home");
+        }
+      }
+    };
+
+    // Listen for deep links
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      handleDeepLink(url);
+    });
+
+    return () => subscription?.remove();
+  }, []);
 
   return (
     <WebView
       source={{ uri: url }}
-      onNavigationStateChange={async ({ url }) => {
+      onNavigationStateChange={({ url }) => {
+        // Fallback: if the callback doesn't redirect properly,
+        // still handle the code in the WebView
         if (url.includes("?code=")) {
           const code = new URL(url).searchParams.get("code");
-          console.log('Got code',code)
+          console.log("Got code in WebView:", code);
 
-          const result = await fetch(`${baseUrl}/finverse/exchange-code`, {
+          // You can still use your exchange-code endpoint as backup
+          fetch(`${baseUrl}/finverse/exchange-code`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ code }),
-          });
-          const { access_token: login_identity_token } = await result.json();
-          console.log('Fetched login identity token')
-          // Store token for fetching transactions later
-          await AsyncStorage.setItem("finverse_token", login_identity_token);
-          router.push("/(tabs)/home");
+          })
+            .then((res) => res.json())
+            .then(async ({ access_token }) => {
+              await AsyncStorage.setItem("finverse_token", access_token);
+              router.push("/(tabs)/home");
+            });
         }
       }}
     />
