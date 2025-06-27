@@ -77,15 +77,18 @@ const iconMap = {
           fetchExpenses();
         }, [fetchExpenses])
       );
+      
+     
 
     const containerBg = colorScheme === 'dark' ? '#2f2b3d' : '#fff';
     const iconColor = colorScheme === 'dark' ? '#FFFFFF' : '#333333';
+      
   
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
           <ThemedText title style={styles.welcomeText}>Hello {username}!</ThemedText>
-  
+
           <View style={[styles.balanceCard, { backgroundColor: containerBg }]}>
             <View>
               <ThemedText>Total Balance</ThemedText>

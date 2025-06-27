@@ -15,16 +15,23 @@ router.post('/finverse/token', async (req, res) => {
     grant_type: 'client_credentials',
   });
   res.json(resp.data); // contains customer_token
+
+  console.log('Generated customer token',resp.data)
 });
 
 // Generate link token (for launching Finverse link)
-// Using link URL included in the link_tken response to launch Finverse Link UI 
+// Using link URL included in the link_token response to launch Finverse Link UI 
 // which will guide the end-user through selecting an institution and authenticating with it.
 router.post('/finverse/link-token', async (req, res) => {
   const { customer_token } = req.body;
   const result = await axios.post(`${FINVERSE_BASE}/link/token`, {
-    ui_mode: 'iframe',
-    redirect_uri: 'https://your-ngrok-url/callback',
+    client_id : CLIENT_ID,
+    redirect_uri: 'https://developer.prod.finverse.net/sink',
+    state: "setup_on_developer_portal_stateparameter",
+    user_id: "customer_user1",
+    grant_type: "client_credentials",
+    response_mode: "form_post",
+    response_type: "code",
   }, {
     headers: { Authorization: `Bearer ${customer_token}` }
   });
@@ -37,9 +44,14 @@ router.post('/finverse/exchange-code', async (req, res) => {
   const result = await axios.post(`${FINVERSE_BASE}/auth/token`, {
     code,
     client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
+    redirect_uri : "https://developer.prod.finverse.net/sink",
+    grant_type : 'authorization_code'
+    
   });
   res.json(result.data); // contains login_identity_token
+
+  // Securely store each login_identity_token in backend
+  // Note: an end-user with 2 linked institutions will have a distinct token for each institution.
 });
 
 // 4. Fetch transactions using login_identity_token
@@ -48,7 +60,7 @@ router.get('/transactions/:account_id', async (req, res) => {
   const { login_identity_token } = req.headers;
 
   try {
-    const response = await axios.get(`https://api.prod.finverse.net/transactions/${account_id}`, {
+    const response = await axios.get(`${FINVERSE_BASE}/transactions/${account_id}?offset=0&limit=100`, {
       headers: {
         Authorization: `Bearer ${login_identity_token}`
       }

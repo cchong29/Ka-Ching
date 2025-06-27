@@ -1,10 +1,19 @@
 // app/webview.jsx
 import { WebView } from 'react-native-webview';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Platform } from 'react-native';
+
+const baseUrl =
+  process.env.EXPO_PUBLIC_ENV === 'production'
+    ? 'https://ka-ching.onrender.com'
+    : Platform.OS === 'android'
+    ? 'http://10.0.2.2:4000'
+    : 'http://localhost:4000';
 
 export default function WebviewScreen() {
   const router = useRouter();
   const { url } = useLocalSearchParams();
+  console.log('Linked to Finverse UI')
 
   return (
     <WebView
@@ -12,7 +21,7 @@ export default function WebviewScreen() {
       onNavigationStateChange={async ({ url }) => {
         if (url.includes('?code=')) {
           const code = new URL(url).searchParams.get('code');
-          const result = await fetch(`${YOUR_BACKEND}/finverse/exchange-code`, {
+          const result = await fetch(`${baseUrl}/finverse/exchange-code`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code }),
@@ -20,7 +29,7 @@ export default function WebviewScreen() {
           const { access_token: login_identity_token } = await result.json();
           // Store token for fetching transactions later
           await AsyncStorage.setItem('finverse_token', login_identity_token);
-          router.push('/(tabs)/home'); // or wherever next
+          router.push('/(tabs)/home'); 
         }
       }}
     />
