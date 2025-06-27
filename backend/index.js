@@ -1,4 +1,3 @@
-// Final version of backend index.js for Supabase + Render + Android compatibility
 const express = require("express");
 const { Server } = require("socket.io");
 const helmet = require("helmet");
@@ -56,11 +55,16 @@ app.use(
 
 app.use("/auth", authrouter);
 app.use("/user",userdetails)
-// app.use('/finverse', finverserouter);
+app.use("/finverse", finverserouter);
 
 app.get("/", (req, res) => {
   res.json("hi");
 });
+
+app.get("/asd", (req, res) => {
+  res.json("hi");
+});
+
 
 io.on("connect", (socket) => {});
 
