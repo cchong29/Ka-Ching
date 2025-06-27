@@ -22,14 +22,14 @@ export default function LinkBank() {
       });
     
     const { access_token: customer_token } = await tokenRes.json();
-    console.log('Fetched customer_token',tokenRes)
+    console.log('Fetched customer_token')
 
     const linkRes = await fetch(`${baseUrl}/finverse/link-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ customer_token })
     });
-    console.log('Generated link-token',linkRes)
+    console.log('Generated link-token')
     const { link_url } = await linkRes.json();
 
     router.push({ pathname: '/finverse', params: { url: link_url } });
