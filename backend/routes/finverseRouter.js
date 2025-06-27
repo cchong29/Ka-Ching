@@ -87,6 +87,7 @@ router.get("/transactions/:account_id", async (req, res) => {
 
 // Add the callback route
 router.get("/callback", async (req, res) => {
+  console.log('Callback triggered', req)
   try {
     const { code } = req.query;
     console.log("Received code:", code);
