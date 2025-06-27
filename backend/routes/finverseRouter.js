@@ -85,19 +85,35 @@ router.get("/transactions/:account_id", async (req, res) => {
   }
 });
 
-// Add this to your backend routes file
-router.get("/callback", (req, res) => {
-  console.log("Callback hit with query params:", req.query);
-  res.send(`
-    <html>
-      <body>
-        <h1>Finverse Callback Received</h1>
-        <p>Code: ${req.query.code || 'No code'}</p>
-        <p>State: ${req.query.state || 'No state'}</p>
-        <p>Error: ${req.query.error || 'No error'}</p>
-      </body>
-    </html>
-  `);
+// Add the callback route
+router.get("/callback", async (req, res) => {
+  try {
+    const { code } = req.query;
+    console.log("Received code:", code);
+    
+    if (!code) {
+      return res.status(400).send("No authorization code received");
+    }
+
+    // Exchange code for token
+    const result = await axios.post(`${FINVERSE_BASE}/auth/token`, {
+      code,
+      client_id: CLIENT_ID,
+      redirect_uri: process.env.FINVERSE_REDIRECT_URI, // Same redirect_uri as in link-token
+      grant_type: "authorization_code",
+    });
+
+    const { access_token: login_identity_token } = result.data;
+    console.log("Successfully exchanged code for token");
+    
+    // Redirect back to your app with success
+    // You'll need to configure a custom scheme for your app
+    res.redirect(`yourapp://finverse-success?token=${encodeURIComponent(login_identity_token)}`);
+    
+  } catch (error) {
+    console.error("Error in callback:", error);
+    res.status(500).send("Authentication failed");
+  }
 });
 
 // In your finverse routes file

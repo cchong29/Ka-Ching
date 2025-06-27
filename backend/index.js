@@ -57,10 +57,13 @@ app.use("/auth", authrouter);
 app.use("/user",userdetails)
 app.use("/finverse", finverserouter);
 
+
+// Testing
 app.get("/", (req, res) => {
   res.json("hi");
 });
 
+// Testing
 app.get("/asd", (req, res) => {
   res.json("hi");
 });
