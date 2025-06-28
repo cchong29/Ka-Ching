@@ -37,7 +37,7 @@ router.post("/link-token", async (req, res) => {
       state: "setup_on_developer_portal_stateparameter",
       user_id: "customer_user1",
       grant_type: "client_credentials",
-      response_mode: "form_post",
+      response_mode: "query",
       response_type: "code",
     },
     {
@@ -87,6 +87,7 @@ router.get("/transactions/:account_id", async (req, res) => {
 
 // Add the callback route
 router.get("/callback", async (req, res) => {
+  console.log('Callback triggered', req)
   try {
     const { code } = req.query;
     console.log("Received code:", code);

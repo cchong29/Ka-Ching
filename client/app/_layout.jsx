@@ -7,6 +7,19 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { StyleSheet } from 'react-native';
+import { useSegments } from 'expo-router';
+
+const linking = {
+  prefixes: ['client://'],
+  config: {
+    screens: {
+      // if you have nested folders under (auth)
+      "(auth)/changepw": "changepw",  // matches myapp://changepw
+      // add other screens if needed
+    },
+  },
+};
+
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -20,7 +33,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
+        <Stack linking = {linking}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="index" options={{ title: 'Home', headerShown: false }} />
