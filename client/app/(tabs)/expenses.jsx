@@ -153,7 +153,7 @@ const ExpensesDashboard = () => {
         style={{ marginTop: 20 }}
       />
       <TouchableOpacity
-        onPress={() => router.push("/expenses")}
+        onPress={() => router.push("/add_expense")}
         style={{
           position: "absolute",
           bottom: 30,
