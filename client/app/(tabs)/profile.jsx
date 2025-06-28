@@ -93,7 +93,7 @@ export default function Profile() {
         {/* Account Settings */}
         <Section title="Account Settings">
           <Item icon={<Feather name="user" size={20} />} label="Email" />
-          <Item icon={<Feather name="lock" size={20} />} label="Change Password" />
+          <Item icon={<Feather name="lock" size={20} />} label="Change Password" onPress={()=>{router.push('/changepw')}}/>
           <Item icon={<Feather name="link" size={20} />} label="Linked Banks" />
           <Item icon={<Feather name="bell" size={20} />} label="Notifications" />
           <Item icon={<Feather name="sun" size={20} />} label="Theme" />
