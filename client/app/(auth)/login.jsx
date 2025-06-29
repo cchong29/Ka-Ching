@@ -10,6 +10,7 @@ import { Platform } from 'react-native';
 import ConsentText from '@/components/ConsentText';
 import { useColorScheme } from 'react-native';
 import { supabase } from '../../lib/supabase';
+import * as AppleAuthentication from 'expo-apple-authentication'
 
 // Themed Components
 import ThemedView from '@/components/ThemedView'
@@ -27,7 +28,7 @@ const baseUrl =
     ? 'http://10.0.2.2:4000'
     : 'http://localhost:4000';
 
-const Login = ({ promptAsync, isSigningIn }) => {
+const Login = ({ promptAsync, isSigningIn, apple }) => {
   const [loginError, setLoginError] = useState('');
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
@@ -181,6 +182,13 @@ const Login = ({ promptAsync, isSigningIn }) => {
         {isSigningIn ? 'Signing in...' : 'Continue with Google'}
       </Text>
     </TouchableOpacity>
+
+    <AppleAuthentication.AppleAuthenticationButton
+        buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+        buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+        cornerRadius={5}
+        style={{ width: 200, height: 64 }}
+        onPress={apple}/>
 
     <ConsentText />
     
