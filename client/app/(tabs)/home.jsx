@@ -17,6 +17,7 @@ import { supabase } from "../../lib/supabase";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "expo-router";
 
 const iconMap = {
   Food: "food-bank",
@@ -38,6 +39,7 @@ const Home = ({ navigation }) => {
   const [expenses, setExpenses] = useState([]);
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
+  const router = useRouter()
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -135,28 +137,48 @@ const Home = ({ navigation }) => {
           data={expenses}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View
-              style={[styles.activityItem, { backgroundColor: containerBg }]}
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/expense_details",
+                  params: {
+                    id: item.id,
+                    title: item.title,
+                    amount: item.amount,
+                    date: item.date,
+                    category: item.category,
+                    note: item.note,
+                  },
+                })
+              }
             >
-              <View style={styles.activityLeft}>
-                <MaterialIcons
-                  name={iconMap[item.category] || "payment"} // fallback icon
-                  size={24}
-                  color={iconColor}
-                  style={{ marginRight: 10 }}
-                />
-                <View>
-                  <ThemedText>{item.title || item.category}</ThemedText>
-                  <ThemedText style={{ fontSize: 12, color: "gray" }}>
-                    {item.category}
-                  </ThemedText>
+              <View
+                style={[styles.activityItem, { backgroundColor: containerBg }]}
+              >
+                <View style={styles.activityLeft}>
+                  <MaterialIcons
+                    name={iconMap[item.category] || "payment"} // fallback icon
+                    size={24}
+                    color={iconColor}
+                    style={{ marginRight: 10 }}
+                  />
+                  <View>
+                    <ThemedText>{item.title || item.category}</ThemedText>
+                    <ThemedText style={{ fontSize: 12, color: "gray" }}>
+                      {item.category}
+                    </ThemedText>
+                  </View>
+                </View>
+                <View style={styles.activityRight}>
+                  <ThemedText>${item.amount.toFixed(2)}</ThemedText>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={16}
+                    color={theme.icon}
+                  />
                 </View>
               </View>
-              <View style={styles.activityRight}>
-                <ThemedText>${item.amount.toFixed(2)}</ThemedText>
-                <Ionicons name="chevron-forward" size={16} color={theme.icon} />
-              </View>
-            </View>
+            </TouchableOpacity>
           )}
           ListEmptyComponent={
             <ThemedText style={{ textAlign: "center", marginTop: 20 }}>
