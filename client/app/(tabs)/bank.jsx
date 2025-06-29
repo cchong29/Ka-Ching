@@ -1,10 +1,11 @@
-import { View, Image, Pressable, StyleSheet, Linking, TouchableOpacity } from 'react-native';
+import { View, Image, Pressable, StyleSheet, Linking, TouchableOpacity, SafeAreaView } from 'react-native';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Platform } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 const baseUrl =
   process.env.EXPO_PUBLIC_ENV === 'production'
@@ -15,57 +16,64 @@ const baseUrl =
 
 export default function LinkBank() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
+
   const handleConnect = async () => {
     alert('Bank connection flow triggered');
     const tokenRes = await fetch(`${baseUrl}/finverse/token`, {
-       method: 'POST', 
-      });
-    
+      method: 'POST',
+    });
+
     const { access_token: customer_token } = await tokenRes.json();
-    console.log('Fetched customer_token')
+    console.log('Fetched customer_token');
 
     const linkRes = await fetch(`${baseUrl}/finverse/link-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ customer_token })
     });
-    console.log('Generated link-token')
+
+    console.log('Generated link-token');
     const { link_url } = await linkRes.json();
 
     router.push({ pathname: '/finverse', params: { url: link_url } });
-    };
+  };
 
   return (
-    <ThemedView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+      <ThemedView style={styles.container}>
+        {/* Back Button */}
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} />
-      </TouchableOpacity>
+          <Ionicons name="arrow-back" size={24} color={theme.icon} />
+        </TouchableOpacity>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <ThemedText title style={styles.title}>Link Bank Account</ThemedText>
-        <ThemedText style={styles.description}>
-          Connect your bank account to import transactions automatically.
-        </ThemedText>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <ThemedText title style={styles.title}>Link Bank Account</ThemedText>
+          <ThemedText style={styles.description}>
+            Connect your bank account to import transactions automatically.
+          </ThemedText>
 
-        <Pressable style={styles.connectBtn} onPress={handleConnect}>
-          <ThemedText style={styles.connectBtnText}>Connect Bank</ThemedText>
-        </Pressable>
+          <Pressable style={styles.connectBtn} onPress={handleConnect}>
+            <ThemedText style={styles.connectBtnText}>Connect Bank</ThemedText>
+          </Pressable>
 
-        <ThemedText style={styles.infoText}>
-          We use Finverse to securely connect your bank. By continuing, you agree to our{' '}
-          <ThemedText style={styles.linkText} onPress={() => router.push('/(auth)/t&c') }>Terms of Service</ThemedText> and{' '}
-          <ThemedText style={styles.linkText} onPress={() => router.push('/(auth)/privacy')}>Privacy Policy</ThemedText>.
-        </ThemedText>
+          <ThemedText style={styles.infoText}>
+            We use Finverse to securely connect your bank. By continuing, you agree to our{' '}
+            <ThemedText style={styles.linkText} onPress={() => router.push('/(auth)/t&c')}>Terms of Service</ThemedText> and{' '}
+            <ThemedText style={styles.linkText} onPress={() => router.push('/(auth)/privacy')}>Privacy Policy</ThemedText>.
+          </ThemedText>
 
-        <ThemedText title style={styles.supportedBanksText}>Supported Banks</ThemedText>
+          <ThemedText title style={styles.supportedBanksText}>Supported Banks</ThemedText>
 
-        <View style={styles.bankRow}>
-          <Image source={require('@/assets/images/dbs.png')} style={styles.bankLogo} />
-          <Image source={require('@/assets/images/ocbc.png')} style={styles.bankLogo} />
-          <Image source={require('@/assets/images/scb.png')} style={styles.bankLogo} />
-        </View>
-      </ScrollView>
-    </ThemedView>
+          <View style={styles.bankRow}>
+            <Image source={require('@/assets/images/dbs.png')} style={styles.bankLogo} />
+            <Image source={require('@/assets/images/ocbc.png')} style={styles.bankLogo} />
+            <Image source={require('@/assets/images/scb.png')} style={styles.bankLogo} />
+          </View>
+        </ScrollView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
@@ -88,8 +96,8 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   backBtn: {
-    marginBottom: 10,
-    padding:20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   connectBtn: {
     backgroundColor: '#1F7D43',

@@ -1,18 +1,14 @@
-import {Image, ScrollView, TouchableOpacity } from 'react-native';
+import {Image, ScrollView, TouchableOpacity, Platform, useColorScheme, Alert } from 'react-native';
 import { Feather, AntDesign, Ionicons } from '@expo/vector-icons';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { Alert } from 'react-native'; 
-import { Platform } from 'react-native';
-import { useColorScheme } from 'react-native';
 import React from 'react';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useState , useEffect } from 'react';
 import { supabase } from "../../lib/supabase";
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile() {
   const [username, setUsername] = useState("");
@@ -75,51 +71,53 @@ export default function Profile() {
   };
 
   return (
-    <ThemedView style={{ flex: 1, padding: 20 }}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <ThemedView style={{ alignItems: 'center', marginTop: 20 }}>
-          <Image
-            source={{ uri: 'https://www.gravatar.com/avatar/?d=mp' }}
-            style={{ width: 100, height: 100, borderRadius: 50 }}
-          />
-          <ThemedText title style={{ fontSize: 20, fontWeight: '600', marginTop: 12 }}>
-            {username}
-          </ThemedText>
-          <ThemedText style={{ marginTop: 4, color: theme.icon }}>
-            {username}@gmail.com
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+      <ThemedView style={{ flex: 1, padding: 20 }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <ThemedView style={{ alignItems: 'center', marginTop: 20 }}>
+            <Image
+              source={{ uri: 'https://www.gravatar.com/avatar/?d=mp' }}
+              style={{ width: 100, height: 100, borderRadius: 50 }}
+            />
+            <ThemedText title style={{ fontSize: 20, fontWeight: '600', marginTop: 12 }}>
+              {username}
+            </ThemedText>
+            <ThemedText style={{ marginTop: 4, color: theme.icon }}>
+              {username}@gmail.com
+            </ThemedText>
+          </ThemedView>
 
-        {/* Account Settings */}
-        <Section title="Account Settings">
-          <Item icon={<Feather name="user" size={20} />} label="Email" />
-          <Item icon={<Feather name="lock" size={20} />} label="Change Password" onPress={()=>{router.push('/changepw')}}/>
-          <Item icon={<Feather name="link" size={20} />} label="Linked Banks" />
-          <Item icon={<Feather name="bell" size={20} />} label="Notifications" />
-          <Item icon={<Feather name="sun" size={20} />} label="Theme" />
-        </Section>
+          {/* Account Settings */}
+          <Section title="Account Settings">
+            <Item icon={<Feather name="user" size={20} />} label="Email" />
+            <Item icon={<Feather name="lock" size={20} />} label="Change Password" onPress={()=>{router.push('/changepw')}}/>
+            <Item icon={<Feather name="link" size={20} />} label="Linked Banks" />
+            <Item icon={<Feather name="bell" size={20} />} label="Notifications" />
+            <Item icon={<Feather name="sun" size={20} />} label="Theme" />
+          </Section>
 
-        {/* Support and Legal */}
-        <Section title="Support and Legal">
-          <Item icon={<AntDesign name="questioncircleo" size={20} />} label="Help & Feedback" />
-          <Item icon={<Feather name="file-text" size={20} />} label="Terms of Service" onPress={() => router.push('/(auth)/t&c')} />
-          <Item icon={<Feather name="shield" size={20} />} label="Privacy Policy" onPress={() => router.push('/(auth)/privacy')} />
-        </Section>
+          {/* Support and Legal */}
+          <Section title="Support and Legal">
+            <Item icon={<AntDesign name="questioncircleo" size={20} />} label="Help & Feedback" />
+            <Item icon={<Feather name="file-text" size={20} />} label="Terms of Service" onPress={() => router.push('/(auth)/t&c')} />
+            <Item icon={<Feather name="shield" size={20} />} label="Privacy Policy" onPress={() => router.push('/(auth)/privacy')} />
+          </Section>
 
-        <TouchableOpacity
-          onPress={signOut}
-          style={{
-            backgroundColor: '#047857',
-            paddingVertical: 14,
-            borderRadius: 8,
-            marginTop: 30,
-            alignItems: 'center',
-          }}
-        >
-          <ThemedText style={{ color: 'white', fontWeight: '600' }}>Sign Out</ThemedText>
-        </TouchableOpacity>
-      </ScrollView>
-    </ThemedView>
+          <TouchableOpacity
+            onPress={signOut}
+            style={{
+              backgroundColor: '#047857',
+              paddingVertical: 14,
+              borderRadius: 8,
+              marginTop: 30,
+              alignItems: 'center',
+            }}
+          >
+            <ThemedText style={{ color: 'white', fontWeight: '600' }}>Sign Out</ThemedText>
+          </TouchableOpacity>
+        </ScrollView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
