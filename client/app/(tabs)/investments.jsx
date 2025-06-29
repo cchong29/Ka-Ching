@@ -15,7 +15,7 @@ export default function Investments() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <ThemedView style={{ flex: 1, padding: 20 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Back & Title */}
