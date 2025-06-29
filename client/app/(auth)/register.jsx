@@ -1,5 +1,5 @@
 // This will be the first page any user sees when they click on the app
-import {Text, StyleSheet,Pressable, Image, TextInput} from 'react-native'
+import {Text, StyleSheet, useColorScheme } from 'react-native'
 import {Link} from 'expo-router'
 import { useRouter } from 'expo-router';
 import {Colors} from '@/constants/Colors'
@@ -29,6 +29,8 @@ const baseUrl =
 
 const Register = () => {
   const [registrationError, setRegistrationError] = useState('');
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme] ?? Colors.light;
 
   const formik = useFormik({
     initialValues: { email: '', password: '' },
@@ -86,7 +88,7 @@ const Register = () => {
 
       
       <ThemedTextInput
-        style={{ width: '80%', marginBottom: 5 }}
+        style={{ width: '80%', marginBottom: 5, borderColor: theme.icon, borderWidth: 1, borderRadius: 6 }}
         placeholder="Email address"
         keyboardType="email-address"
         onChangeText={formik.handleChange('email')}
@@ -98,7 +100,7 @@ const Register = () => {
       )}
 
       <ThemedTextInput
-        style={{ width: '80%', marginBottom: 5 }}
+        style={{ width: '80%', marginBottom: 5, borderColor: theme.icon, borderWidth: 1, borderRadius: 6 }}
         placeholder="Password"
         secureTextEntry
         onChangeText={formik.handleChange('password')}
