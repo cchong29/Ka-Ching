@@ -1,5 +1,5 @@
-import { View, Image, ScrollView, TouchableOpacity } from 'react-native';
-import { MaterialIcons, Feather, AntDesign, Ionicons } from '@expo/vector-icons';
+import {Image, ScrollView, TouchableOpacity } from 'react-native';
+import { Feather, AntDesign, Ionicons } from '@expo/vector-icons';
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
@@ -77,7 +77,7 @@ export default function Profile() {
   return (
     <ThemedView style={{ flex: 1, padding: 20 }}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={{ alignItems: 'center', marginTop: 20 }}>
+        <ThemedView style={{ alignItems: 'center', marginTop: 20 }}>
           <Image
             source={{ uri: 'https://www.gravatar.com/avatar/?d=mp' }}
             style={{ width: 100, height: 100, borderRadius: 50 }}
@@ -88,7 +88,7 @@ export default function Profile() {
           <ThemedText style={{ marginTop: 4, color: theme.icon }}>
             {username}@gmail.com
           </ThemedText>
-        </View>
+        </ThemedView>
 
         {/* Account Settings */}
         <Section title="Account Settings">
@@ -128,7 +128,7 @@ function Section({ title, children }) {
   const theme = Colors[colorScheme] ?? Colors.light;
 
   return (
-    <View style={{ marginTop: 30 }}>
+    <ThemedView style={{ marginTop: 30 }}>
       <ThemedText
         style={{
           marginBottom: 12,
@@ -139,8 +139,8 @@ function Section({ title, children }) {
       >
         {title}
       </ThemedText>
-      <View>{children}</View>
-    </View>
+      <ThemedView>{children}</ThemedView>
+    </ThemedView>
   );
 }
 
@@ -170,9 +170,9 @@ function Item({ icon, label, onPress }) {
         elevation: 2,
       }}
     >
-      <View style={{ marginRight: 12 }}>
+      <ThemedView style={{ marginRight: 12 }}>
         {React.cloneElement(icon, { color: theme.icon })}
-      </View>
+      </ThemedView>
       <ThemedText style={{ fontSize: 16 }}>{label}</ThemedText>
       <Ionicons
         name="chevron-forward"
