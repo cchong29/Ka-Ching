@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
-import { View, FlatList, Text, TouchableOpacity, Dimensions, ScrollView, StyleSheet, SafeAreaView } from "react-native";
+import {
+  View,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "react-native";
@@ -8,21 +17,28 @@ import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/Colors";
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
+const router = useRouter();
 
 const colorScheme = useColorScheme();
-const theme = Colors[colorScheme ?? 'light'];
+const theme = Colors[colorScheme ?? "light"];
 
 const screenWidth = Dimensions.get("window").width;
 
-const ExpenseItem = ({ expense, theme }) => (
-  <View style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+const ExpenseItem = ({ expense, theme, onPress }) => (
+  <TouchableOpacity
+    onPress={() => onPress(expense)}
+    style={[
+      styles.card,
+      { backgroundColor: theme.uibackground, borderColor: theme.border },
+    ]}
+  >
     <ThemedText style={{ fontWeight: "600" }}>
       {expense.title} - ${expense.amount.toFixed(2)}
     </ThemedText>
     <ThemedText style={{ fontSize: 13, color: theme.icon }}>
       {expense.category} | {new Date(expense.date).toDateString()}
     </ThemedText>
-  </View>
+  </TouchableOpacity>
 );
 
 const ExpensesDashboard = () => {
@@ -30,7 +46,6 @@ const ExpensesDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const router = useRouter();
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -54,12 +69,27 @@ const ExpensesDashboard = () => {
   }, {});
 
   const barChartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: [{
-      data: Array.from({ length: 12 }, (_, i) =>
-        parseFloat((monthTotals[i] || 0).toFixed(2))
-      )
-    }],
+    labels: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ],
+    datasets: [
+      {
+        data: Array.from({ length: 12 }, (_, i) =>
+          parseFloat((monthTotals[i] || 0).toFixed(2))
+        ),
+      },
+    ],
   };
 
   const chartConfig = {
@@ -79,9 +109,11 @@ const ExpensesDashboard = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <ThemedView style={{ flex: 1, padding: 20 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
-
           {/* Back Button */}
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backBtn}
+          >
             <Ionicons name="arrow-back" size={24} color={theme.icon} />
           </TouchableOpacity>
 
@@ -91,72 +123,120 @@ const ExpensesDashboard = () => {
 
           {/* Category Filter */}
           <View style={styles.filterWrap}>
-            {["All", "Food", "Transport", "Shopping", "Travel", "Bills", "Others"].map((cat) => (
+            {[
+              "All",
+              "Food",
+              "Transport",
+              "Shopping",
+              "Travel",
+              "Bills",
+              "Others",
+            ].map((cat) => (
               <TouchableOpacity
                 key={cat}
                 onPress={() => setSelectedCategory(cat)}
                 style={[
                   styles.filterBtn,
                   {
-                    backgroundColor: selectedCategory === cat ? theme.tint : theme.uibackground,
+                    backgroundColor:
+                      selectedCategory === cat
+                        ? theme.tint
+                        : theme.uibackground,
                     borderColor: theme.tint,
                   },
                 ]}
               >
-                <Text style={{ color: selectedCategory === cat ? "#fff" : theme.text }}>
+                <Text
+                  style={{
+                    color: selectedCategory === cat ? "#fff" : theme.text,
+                  }}
+                >
                   {cat}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <View style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 20, marginTop: 10 }}>
-          {/* Simulated Y-axis */}
-          <View style={{ justifyContent: "space-between", height: 220, paddingBottom: 32 }}>
-            {[...Array(5)].map((_, i) => {
-              const maxVal = Math.max(...barChartData.datasets[0].data, 10); // avoid 0
-              const roundedMax = Math.ceil(maxVal / 10) * 10; // round to nearest 10
-              const yLabel = ((roundedMax / 4) * (4 - i)).toFixed(0);
-              return (
-                <Text
-                  key={i}
-                  style={{
-                    color: theme.text,
-                    fontSize: 12,
-                    textAlign: "right",
-                    paddingRight: 5,
-                  }}
-                >
-                  ${yLabel}
-                </Text>
-              );
-            })}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              marginBottom: 20,
+              marginTop: 10,
+            }}
+          >
+            {/* Simulated Y-axis */}
+            <View
+              style={{
+                justifyContent: "space-between",
+                height: 220,
+                paddingBottom: 32,
+              }}
+            >
+              {[...Array(5)].map((_, i) => {
+                const maxVal = Math.max(...barChartData.datasets[0].data, 10); // avoid 0
+                const roundedMax = Math.ceil(maxVal / 10) * 10; // round to nearest 10
+                const yLabel = ((roundedMax / 4) * (4 - i)).toFixed(0);
+                return (
+                  <Text
+                    key={i}
+                    style={{
+                      color: theme.text,
+                      fontSize: 12,
+                      textAlign: "right",
+                      paddingRight: 5,
+                    }}
+                  >
+                    ${yLabel}
+                  </Text>
+                );
+              })}
+            </View>
+
+            {/* Scrollable Bar Chart */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <BarChart
+                data={barChartData}
+                width={screenWidth * 1.5}
+                height={220}
+                chartConfig={chartConfig}
+                verticalLabelRotation={30}
+                fromZero
+                showValuesOnTopOfBars
+                withVerticalLabels={true}
+                withHorizontalLabels={false} // hide default Y-axis
+                yAxisLabel=""
+                style={{ borderRadius: 12, marginLeft: 0 }} // removed left margin
+              />
+            </ScrollView>
           </View>
 
-          {/* Scrollable Bar Chart */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <BarChart
-              data={barChartData}
-              width={screenWidth * 1.5}
-              height={220}
-              chartConfig={chartConfig}
-              verticalLabelRotation={30}
-              fromZero
-              showValuesOnTopOfBars
-              withVerticalLabels={true}
-              withHorizontalLabels={false} // hide default Y-axis
-              yAxisLabel=""
-              style={{ borderRadius: 12, marginLeft: 0 }} // removed left margin
-            />
-          </ScrollView>
-        </View>
-
           {/* Expense List */}
-          <ThemedText title style={{ marginVertical: 16 }}>Recent Expenses</ThemedText>
+          <ThemedText title style={{ marginVertical: 16 }}>
+            Recent Expenses
+          </ThemedText>
           <FlatList
             data={expenses}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => <ExpenseItem expense={item} theme={theme} />}
+            renderItem={({ item }) => (
+              <ExpenseItem
+                expense={item}
+                theme={theme}
+                onPress={(expense) => {
+                  router.push({
+                    pathname: "/expense_details",
+                    params: {
+                      id: expense.id,
+                      title: expense.title,
+                      amount: expense.amount,
+                      date: expense.date,
+                      category: expense.category,
+                      note: expense.note,
+                    },
+                  });
+                }}
+              />
+            )}
             scrollEnabled={false}
           />
         </ScrollView>
@@ -164,9 +244,14 @@ const ExpensesDashboard = () => {
         {/* Add Expense FAB */}
         <TouchableOpacity
           onPress={() => router.push("/add_expense")}
-          style={[styles.fab, { backgroundColor: theme.tint, shadowColor: theme.icon }]}
+          style={[
+            styles.fab,
+            { backgroundColor: theme.tint, shadowColor: theme.icon },
+          ]}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>+ Add Expense</Text>
+          <Text style={{ color: "#fff", fontWeight: "bold" }}>
+            + Add Expense
+          </Text>
         </TouchableOpacity>
       </ThemedView>
     </SafeAreaView>
