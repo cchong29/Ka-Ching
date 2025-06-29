@@ -86,6 +86,7 @@ router.get("/transactions/:account_id", async (req, res) => {
 });
 
 // Add the callback route
+// Call the redirect URI with the one time code
 router.get("/callback", async (req, res) => {
   console.log('Callback triggered', req)
   try {
