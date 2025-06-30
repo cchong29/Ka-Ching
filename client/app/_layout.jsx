@@ -41,6 +41,11 @@ export default function RootLayout() {
             name="expense_details"
             options={{ headerShown: false }}
           />
+                    <Stack.Screen name="add_budget" options={{ headerShown: false }} />
+                    <Stack.Screen name="add_goal" options={{ headerShown: false }} />
+
+          <Stack.Screen name="add_income" options={{ headerShown: false }} />
+
           <Stack.Screen name="edit_expense" options={{ headerShown: false }} />
           <Stack.Screen name="add_expense" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
