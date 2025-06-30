@@ -1,11 +1,22 @@
-import { View, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
 import ThemedText from "@/components/ThemedText";
 import ThemedButton from "@/components/ThemedButton";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import ThemedView from "@/components/ThemedView";
 import { supabase } from "@/lib/supabase";
+import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
 
 export default function ExpenseDetails() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
   const params = useLocalSearchParams();
   const router = useRouter();
 
@@ -32,7 +43,7 @@ export default function ExpenseDetails() {
   };
 
   const handleModify = () => {
-    console.log(params)
+    console.log(params);
     router.push({
       pathname: "/edit_expense",
       params: {
@@ -48,12 +59,17 @@ export default function ExpenseDetails() {
 
   return (
     <ThemedView style={styles.container}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} color={theme.icon} />
+      </TouchableOpacity>
       <ThemedText style={styles.title}>{params.title}</ThemedText>
 
       <View style={styles.detailsCard}>
         <View style={styles.row}>
           <ThemedText style={styles.label}>Amount:</ThemedText>
-          <ThemedText style={styles.value}>${Number(params.amount).toFixed(2)}</ThemedText>
+          <ThemedText style={styles.value}>
+            ${Number(params.amount).toFixed(2)}
+          </ThemedText>
         </View>
         <View style={styles.row}>
           <ThemedText style={styles.label}>Date:</ThemedText>
@@ -71,10 +87,14 @@ export default function ExpenseDetails() {
 
       <View style={styles.buttonRow}>
         <ThemedButton onPress={handleModify} style={styles.modifyBtn}>
-          <ThemedText style={{ color: 'white', alignSelf: 'center' }}>Modify</ThemedText>
+          <ThemedText style={{ color: "white", alignSelf: "center" }}>
+            Modify
+          </ThemedText>
         </ThemedButton>
         <ThemedButton onPress={handleDelete} style={styles.deleteBtn}>
-        <ThemedText style={{ color: 'white', alignSelf: 'center' }}>Delete</ThemedText>
+          <ThemedText style={{ color: "white", alignSelf: "center" }}>
+            Delete
+          </ThemedText>
         </ThemedButton>
       </View>
     </ThemedView>
