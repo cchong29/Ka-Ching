@@ -98,7 +98,7 @@ export default function Profile() {
 
           {/* Support and Legal */}
           <Section title="Support and Legal">
-            <Item icon={<AntDesign name="questioncircleo" size={20} />} label="Help & Feedback" />
+            <Item icon={<AntDesign name="questioncircleo" size={20} />} label="Help & Feedback" onPress={() => router.push('/(auth)/feedback')}/>
             <Item icon={<Feather name="file-text" size={20} />} label="Terms of Service" onPress={() => router.push('/(auth)/t&c')} />
             <Item icon={<Feather name="shield" size={20} />} label="Privacy Policy" onPress={() => router.push('/(auth)/privacy')} />
           </Section>
