@@ -17,10 +17,9 @@ import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/Colors";
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
-const router = useRouter();
 
-const colorScheme = useColorScheme();
-const theme = Colors[colorScheme ?? "light"];
+
+
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -46,6 +45,7 @@ const ExpensesDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const router = useRouter();
 
   useEffect(() => {
     const fetchExpenses = async () => {
