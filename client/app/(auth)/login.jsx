@@ -172,6 +172,7 @@ const Login = ({ promptAsync, isSigningIn, apple }) => {
           borderRadius: 8,
           width: '80%',
           marginTop: 10,
+          marginBottom:10
         }}
       >
       <Image
@@ -187,7 +188,7 @@ const Login = ({ promptAsync, isSigningIn, apple }) => {
         buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
         buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
         cornerRadius={5}
-        style={{ width: 200, height: 64 }}
+        style={{ width: '80%', height: 40 }}
         onPress={apple}/>
 
     <ConsentText />

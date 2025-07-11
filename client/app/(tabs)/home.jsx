@@ -37,6 +37,8 @@ const baseUrl =
 const Home = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [expenses, setExpenses] = useState([]);
+  const [showAddOptions, setShowAddOptions] = useState(false);
+
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
   const router = useRouter()
@@ -106,7 +108,7 @@ const Home = ({ navigation }) => {
             <ThemedText>Total Balance</ThemedText>
             <ThemedText style={styles.balanceText}>$5,038.24</ThemedText>
           </View>
-          <TouchableOpacity style={styles.addBtn}>
+          <TouchableOpacity style={styles.addBtn} onPress={() => setShowAddOptions(true)}>
             <Ionicons name="add" size={24} color="white" />
           </TouchableOpacity>
         </View>
@@ -186,6 +188,36 @@ const Home = ({ navigation }) => {
             </ThemedText>
           }
         />
+        {showAddOptions && (
+  <View style={styles.overlay}>
+    <View style={styles.modal}>
+      <TouchableOpacity
+        style={styles.modalBtn}
+        onPress={() => {
+          setShowAddOptions(false);
+          router.push('/add_expense');
+        }}
+      >
+        <ThemedText>Add Expense</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.modalBtn}
+        onPress={() => {
+          setShowAddOptions(false);
+          router.push('/add_income');
+        }}
+      >
+        <ThemedText>Add Income</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => setShowAddOptions(false)}
+        style={styles.modalCancel}
+      >
+        <ThemedText style={{ color: 'red' }}>Cancel</ThemedText>
+      </TouchableOpacity>
+    </View>
+  </View>
+)}
       </ThemedView>
     </SafeAreaView>
   );
@@ -267,4 +299,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  modal: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+    elevation: 5,
+    alignItems: "center",
+  },
+  modalBtn: {
+    paddingVertical: 12,
+    width: "100%",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  modalCancel: {
+    paddingVertical: 12,
+    width: "100%",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  
 });

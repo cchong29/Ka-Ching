@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
   backBtn: {
     paddingHorizontal: 20,
     paddingVertical: 10,
+    marginTop:25,
   },
   connectBtn: {
     backgroundColor: '#1F7D43',

@@ -46,6 +46,7 @@ export default function () {
 
   
   const appleSignin = async ()=> {
+    console.log('Sign in triggered')
     try {
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
@@ -72,8 +73,10 @@ export default function () {
     } catch (e) {
       if (e.code === 'ERR_REQUEST_CANCELED') {
         // handle that the user canceled the sign-in flow
+        console.log(e)
       } else {
         // handle other errors
+        console.log(e)
       }
     }
   }

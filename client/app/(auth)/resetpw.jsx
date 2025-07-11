@@ -5,11 +5,14 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { StyleSheet } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
-import { Text } from "react-native";
+import { Text, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const router = useRouter()
 
   const handleReset = async () => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -24,6 +27,10 @@ export default function ResetPasswordPage() {
 
   return (
     <ThemedView style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24}  />
+          </TouchableOpacity>
+
       <ThemedText style={styles.title}>Reset your password</ThemedText>
       <ThemedTextInput
         placeholder="Enter your email"
@@ -48,4 +55,5 @@ const styles = StyleSheet.create({
     title: { fontSize: 20, marginBottom: 20 },
     input: { borderWidth: 1, borderColor: "#ccc", padding: 10, marginBottom: 20 },
     message: { marginTop: 20 },
+    backBtn:{marginTop:10},
   });

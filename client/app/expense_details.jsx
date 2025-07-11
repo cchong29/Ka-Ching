@@ -147,4 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f44336",
   },
+  backBtn:{
+    marginTop:20,
+  }
 });

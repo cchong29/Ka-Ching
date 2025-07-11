@@ -131,7 +131,7 @@ export default function GoalsAndBudgets() {
 
 const styles = StyleSheet.create({
   backBtn: {
-    marginBottom: 12,
+    marginTop:20,
   },
   sectionTitle: {
     marginTop: 20,
