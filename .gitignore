@@ -37,3 +37,8 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+client/.null.swp
+client/.RNGoogleSignin.mm.swp
+client/ios/Podfile.lock
+client/ios/client/PrivacyInfo.xcprivacy
+client/ios/client.xcodeproj/project.pbxproj

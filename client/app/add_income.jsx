@@ -5,6 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import ModalSelector from 'react-native-modal-selector';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import ThemedView from '@/components/ThemedView';
 import ThemedText from '@/components/ThemedText';
@@ -69,6 +70,7 @@ const AddIncome = () => {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background}}>
     <ThemedView style={styles.container}>
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
         <Ionicons name="arrow-back" size={24} color={theme.icon} />
@@ -171,6 +173,7 @@ const AddIncome = () => {
         <ThemedText style={styles.btnText}>Save Income</ThemedText>
       </ThemedButton>
     </ThemedView>
+    </SafeAreaView>
   );
 };
 

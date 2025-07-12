@@ -1,65 +1,110 @@
-import { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  Dimensions,
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
+import { useFocusEffect } from "@react-navigation/native";
+import * as Progress from "react-native-progress";
+
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
-import * as Progress from "react-native-progress";
 import { Colors } from "@/constants/Colors";
 
-export default function GoalsAndBudgets() {
-  const [goals, setGoals] = useState([]);
-  const [budgets, setBudgets] = useState([]);
+export default function Plan() {
   const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const theme = Colors[colorScheme] ?? Colors.light;
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchGoalsAndBudgets = async () => {
-      const { data: goalData } = await supabase.from("goals").select("*");
-      const { data: budgetData } = await supabase.from("budgets").select("*");
-      setGoals(goalData || []);
-      setBudgets(budgetData || []);
-    };
-    fetchGoalsAndBudgets();
+  const [goals, setGoals] = useState([]);
+  const [budgets, setBudgets] = useState([]);
+
+  // Fetch from Supabase
+  const fetchData = useCallback(async () => {
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (userError || !user) return;
+  
+    // Fetch budgets and goals for user
+    const [{ data: goalsData }, { data: budgetsData }] = await Promise.all([
+      supabase.from("goals").select("*").eq("user_id", user.id),
+      supabase.from("budgets").select("*").eq("user_id", user.id),
+    ]);
+  
+    // Fetch all expenses for user
+    const { data: expensesData } = await supabase.from("expenses").select("*").eq("user_id", user.id);
+  
+    // Calculate spent_amount per budget by summing expenses matching budget category & within budget timeframe
+    const updatedBudgets = budgetsData.map((budget) => {
+      // Parse dates from budget
+      const start = new Date(budget.start_date);
+      const end = new Date(budget.end_date);
+  
+      // Sum expenses amount matching category and date range
+      const spent_amount = expensesData
+        .filter(exp => 
+          exp.category === budget.category &&
+          new Date(exp.date) >= start &&
+          new Date(exp.date) <= end
+        )
+        .reduce((sum, exp) => sum + exp.amount, 0);
+  
+      return { ...budget, spent_amount };
+    });
+  
+    setGoals(goalsData || []);
+    setBudgets(updatedBudgets || []);
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      <ThemedView style={{ flex: 1, padding: 20 }}>
+      <ThemedView style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
+
+          {/* Back Button */}
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={theme.icon} />
           </TouchableOpacity>
 
           {/* Goals Section */}
           <ThemedText title style={styles.sectionTitle}>My Savings Goals</ThemedText>
-          {goals.map(goal => {
-            const progress = Math.min(goal.saved_amount / goal.target_amount, 1);
+          {goals.length === 0 && (
+            <ThemedText style={{ textAlign: "center", marginBottom: 12, color: theme.text }}>
+              No goals yet. Tap “+ Add Goal” to create one.
+            </ThemedText>
+          )}
+          {goals.map(g => {
+            const progress = g.target_amount ? Math.min(g.saved_amount / g.target_amount, 1) : 0;
             return (
-              <View key={goal.id} style={styles.card}>
-                <ThemedText>{goal.name}</ThemedText>
-                <ThemedText style={{ fontSize: 13 }}>
-                  ${goal.saved_amount} / ${goal.target_amount}
+              <View key={g.id} style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+                <ThemedText style={{ fontWeight: "600" }}>{g.name}</ThemedText>
+                <ThemedText style={{ fontSize: 13, color: theme.icon }}>
+                  ${g.saved_amount.toFixed(2)} / ${g.target_amount.toFixed(2)}
                 </ThemedText>
                 <Progress.Bar
                   progress={progress}
                   color={theme.tint}
-                  height={12}
-                  style={{ marginTop: 8 }}
+                  width={Dimensions.get("window").width - 80}
+                  height={10}
+                  style={{ marginTop: 8, borderRadius: 5 }}
                 />
                 <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
-                  {progress * 100 >= 100
+                  {progress >= 1
                     ? "✅ Goal reached!"
-                    : `Still need $${(goal.target_amount - goal.saved_amount).toFixed(2)}`}
+                    : `You need $${(g.target_amount - g.saved_amount).toFixed(2)} more`}
                 </ThemedText>
               </View>
             );
@@ -73,56 +118,45 @@ export default function GoalsAndBudgets() {
           </TouchableOpacity>
 
           {/* Budgets Section */}
-          <ThemedText title style={styles.sectionTitle}>My Budgets</ThemedText>
-          {budgets.map(budget => {
-            const progress = Math.min(budget.spent / budget.limit, 1);
+          <ThemedText title style={[styles.sectionTitle, { marginTop: 30 }]}>My Budgets</ThemedText>
+          {budgets.length === 0 && (
+            <ThemedText style={{ textAlign: "center", marginBottom: 12, color: theme.text }}>
+              No budgets yet. Tap “+ Add Budget” to create one.
+            </ThemedText>
+          )}
+          {budgets.map(b => {
+            const spent = b.spent_amount || 0;
+            const limit = b.amount;
+            const progress = limit ? Math.min(spent / limit, 1) : 0;
             return (
-              <View key={budget.id} style={styles.card}>
-                <ThemedText>{budget.category}</ThemedText>
-                <ThemedText style={{ fontSize: 13 }}>
-                  ${budget.spent} / ${budget.limit}
+              <View key={b.id} style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+                <ThemedText style={{ fontWeight: "600" }}>{b.name}</ThemedText>
+                <ThemedText style={{ fontSize: 13, color: theme.icon }}>
+                  ${spent.toFixed(2)} / ${limit.toFixed(2)}
                 </ThemedText>
                 <Progress.Bar
                   progress={progress}
-                  color={"red"}
-                  height={12}
-                  style={{ marginTop: 8 }}
+                  color={progress >= 1 ? "red" : theme.tint}
+                  width={Dimensions.get("window").width - 80}
+                  height={10}
+                  style={{ marginTop: 8, borderRadius: 5 }}
                 />
                 <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
                   {progress >= 1
                     ? "⚠️ Over budget!"
-                    : `You have $${(budget.limit - budget.spent).toFixed(2)} left`}
+                    : `You have $${(limit - spent).toFixed(2)} remaining`}
                 </ThemedText>
               </View>
             );
           })}
 
           <TouchableOpacity
-            style={[styles.addBtn, { backgroundColor: "green" }]}
+            style={[styles.addBtn, { backgroundColor: theme.tint }]}
             onPress={() => router.push("/add_budget")}
           >
-            <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>Add Budget</ThemedText>
+            <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>+ Add Budget</ThemedText>
           </TouchableOpacity>
 
-          {/* Insights / Recommendations */}
-          <ThemedText title style={styles.sectionTitle}>Insights</ThemedText>
-          <ThemedText style={{ fontSize: 14, marginBottom: 20 }}>
-            {budgets.some(b => b.spent > b.limit)
-              ? "You have exceeded one or more budgets this month."
-              : "You're on track with all your budgets!"}
-          </ThemedText>
-          {goals.map(goal => {
-            const monthsLeft = Math.ceil(
-              (goal.target_amount - goal.saved_amount) / (goal.monthly_contribution || 1)
-            );
-            return (
-              <ThemedText key={goal.id} style={{ fontSize: 14 }}>
-                {goal.saved_amount >= goal.target_amount
-                  ? `🎉 You've hit your ${goal.name} goal!`
-                  : `At this rate, you'll reach your ${goal.name} goal in ${monthsLeft} months.`}
-              </ThemedText>
-            );
-          })}
         </ScrollView>
       </ThemedView>
     </SafeAreaView>
@@ -130,25 +164,20 @@ export default function GoalsAndBudgets() {
 }
 
 const styles = StyleSheet.create({
-  backBtn: {
-    marginTop:20,
-  },
-  sectionTitle: {
-    marginTop: 20,
-    marginBottom: 10,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  container: { flex: 1, padding: 20 },
+  backBtn: { marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
   card: {
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
     marginBottom: 12,
+    elevation: 2,
   },
   addBtn: {
-    padding: 14,
+    paddingVertical: 14,
     borderRadius: 20,
-    marginTop: 8,
     alignItems: "center",
+    marginVertical: 10,
   },
 });
