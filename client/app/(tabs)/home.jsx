@@ -67,21 +67,22 @@ const Home = ({ navigation }) => {
 
   // Fetch expenses when focused
   const fetchExpenses = useCallback(async () => {
-    const { data, error: userError } = await supabase.auth.getUser();
-    const user = data?.user;
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
   
     if (userError || !user) {
       console.error("User not logged in or error fetching user:", userError);
       return;
     }
   
-    // Fetch expenses
+    // Fetch the 10 most recent expenses ordered by date descending
     const { data: expensesData, error: expensesError } = await supabase
       .from("expenses")
       .select("*")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .order("date", { ascending: false })
+      .limit(10);
   
-    // Fetch income
+    // Fetch all income to compute totalIncome and balance as before
     const { data: incomeData, error: incomeError } = await supabase
       .from("income")
       .select("*")
@@ -96,8 +97,7 @@ const Home = ({ navigation }) => {
   
     const totalExpenses = (expensesData || []).reduce((sum, item) => sum + item.amount, 0);
     const totalIncome = (incomeData || []).reduce((sum, item) => sum + item.amount, 0);
-
-    setExpenses(expensesData || []);
+  
     setTotalExpenses(totalExpenses);
     setTotalIncome(totalIncome);
     setBalance(totalIncome - totalExpenses);
@@ -206,35 +206,35 @@ const Home = ({ navigation }) => {
           }
         />
         {showAddOptions && (
-  <View style={styles.overlay}>
-    <View style={styles.modal}>
-      <TouchableOpacity
-        style={styles.modalBtn}
-        onPress={() => {
-          setShowAddOptions(false);
-          router.push('/add_expense');
-        }}
-      >
-        <ThemedText>Add Expense</ThemedText>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.modalBtn}
-        onPress={() => {
-          setShowAddOptions(false);
-          router.push('/add_income');
-        }}
-      >
-        <ThemedText>Add Income</ThemedText>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => setShowAddOptions(false)}
-        style={styles.modalCancel}
-      >
-        <ThemedText style={{ color: 'red' }}>Cancel</ThemedText>
-      </TouchableOpacity>
-    </View>
-  </View>
-)}
+        <View style={styles.overlay}>
+          <View style={styles.modal}>
+            <TouchableOpacity
+              style={styles.modalBtn}
+              onPress={() => {
+                setShowAddOptions(false);
+                router.push('/add_expense');
+              }}
+            >
+              <ThemedText>Add Expense</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalBtn}
+              onPress={() => {
+                setShowAddOptions(false);
+                router.push('/add_income');
+              }}
+            >
+              <ThemedText>Add Income</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowAddOptions(false)}
+              style={styles.modalCancel}
+            >
+              <ThemedText style={{ color: 'red' }}>Cancel</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
       </ThemedView>
     </SafeAreaView>
   );

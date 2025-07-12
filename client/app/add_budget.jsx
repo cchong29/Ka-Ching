@@ -1,15 +1,17 @@
-import { useState } from "react";
-import { SafeAreaView, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import React, { useState } from "react";
+import { SafeAreaView, StyleSheet, Alert, TouchableOpacity, Platform, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import ModalSelector from "react-native-modal-selector";
+
 import { supabase } from "@/lib/supabase";
+import { Colors } from "@/constants/Colors";
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import ThemedButton from "@/components/ThemedButton";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { Colors } from "@/constants/Colors";
 
 export default function AddBudget() {
   const theme = Colors[useColorScheme() ?? "light"];
@@ -22,11 +24,12 @@ export default function AddBudget() {
   const [endDate, setEndDate] = useState(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSave = async () => {
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      alert("Enter a valid budget amount.");
+      Alert.alert("Invalid amount", "Enter a valid budget amount.");
       return;
     }
 
@@ -46,29 +49,35 @@ export default function AddBudget() {
     });
 
     if (error) {
-      console.error("Error saving budget:", error.message);
-      alert("Failed to save budget.");
+      console.error("Supabase error:", error.message);
+      Alert.alert("Error", "Failed to save budget.");
       return;
     }
 
-    router.back();
+    setName("");
+    setAmount("");
+    setCategory("");
+    setStartDate(new Date());
+    setEndDate(new Date());
+    setSuccessMessage("✅ Budget saved!");
+
+    setTimeout(() => setSuccessMessage(""), 2000);
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      <ThemedView style={{ flex: 1, padding: 20 }}>
-        {/* Back */}
+      <ThemedView style={styles.container}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={theme.icon} />
         </TouchableOpacity>
 
-        <ThemedText title style={styles.header}>Add a New Budget</ThemedText>
+        <ThemedText title style={styles.header}>Add Budget</ThemedText>
 
         <ThemedTextInput
-          placeholder="Budget name (e.g. Monthly Groceries)"
+          placeholder="Budget name (e.g. Groceries)"
           value={name}
           onChangeText={setName}
-          style={styles.input}
+          style={[styles.input, { borderColor: theme.icon }]}
         />
 
         <ThemedTextInput
@@ -76,17 +85,37 @@ export default function AddBudget() {
           keyboardType="decimal-pad"
           value={amount}
           onChangeText={setAmount}
-          style={styles.input}
+          style={[styles.input, { borderColor: theme.icon }]}
         />
 
-        <ThemedTextInput
-          placeholder="Category (optional)"
-          value={category}
-          onChangeText={setCategory}
-          style={styles.input}
-        />
+        {/* Category Selector */}
+        <View style={[styles.dateInput, { backgroundColor: theme.uibackground, borderColor: theme.icon }]}>
+          <ModalSelector
+            data={[
+              { key: "Food", label: "Food" },
+              { key: "Transport", label: "Transport" },
+              { key: "Shopping", label: "Shopping" },
+              { key: "Travel", label: "Travel" },
+              { key: "Bills", label: "Bills" },
+              { key: "Others", label: "Others" },
+            ]}
+            initValue="Select a category"
+            onChange={(option) => setCategory(option.key)}
+            optionTextStyle={{ color: theme.text }}
+            optionContainerStyle={{ backgroundColor: theme.background }}
+            cancelStyle={{ backgroundColor: theme.background }}
+            cancelTextStyle={{ color: theme.text }}
+            initValueTextStyle={{ color: category ? theme.text : "#999999", fontSize: 16 }}
+            selectTextStyle={{ color: theme.text, fontSize: 16 }}
+            style={{ flex: 1 }}
+          >
+            <ThemedText>{category || "Select a category"}</ThemedText>
+          </ModalSelector>
 
-        {/* Start date picker */}
+          <Ionicons name="chevron-down" size={20} color={theme.icon} />
+        </View>
+
+        {/* Start Date */}
         <TouchableOpacity
           onPress={() => setShowStartPicker(true)}
           style={[styles.dateInput, { borderColor: theme.icon, backgroundColor: theme.uibackground }]}
@@ -98,14 +127,15 @@ export default function AddBudget() {
           <DateTimePicker
             value={startDate}
             mode="date"
-            onChange={(e, date) => {
+            display={Platform.OS === "ios" ? "inline" : "default"}
+            onChange={(event, date) => {
               setShowStartPicker(false);
               if (date) setStartDate(date);
             }}
           />
         )}
 
-        {/* End date picker */}
+        {/* End Date */}
         <TouchableOpacity
           onPress={() => setShowEndPicker(true)}
           style={[styles.dateInput, { borderColor: theme.icon, backgroundColor: theme.uibackground }]}
@@ -117,17 +147,22 @@ export default function AddBudget() {
           <DateTimePicker
             value={endDate}
             mode="date"
-            onChange={(e, date) => {
+            display={Platform.OS === "ios" ? "inline" : "default"}
+            onChange={(event, date) => {
               setShowEndPicker(false);
               if (date) setEndDate(date);
             }}
           />
         )}
 
-        <ThemedButton onPress={handleSave}>
-          <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>
-            Save Budget
+        {successMessage !== "" && (
+          <ThemedText style={{ color: "green", textAlign: "center", marginBottom: 10 }}>
+            {successMessage}
           </ThemedText>
+        )}
+
+        <ThemedButton onPress={handleSave}>
+          <ThemedText style={styles.btnText}>Save Budget</ThemedText>
         </ThemedButton>
       </ThemedView>
     </SafeAreaView>
@@ -135,21 +170,37 @@ export default function AddBudget() {
 }
 
 const styles = StyleSheet.create({
-  backBtn: { marginBottom: 12 },
-  header: {
-    fontSize: 20,
-    marginBottom: 20,
-    fontWeight: "bold",
-    textAlign: "center",
+  container: {
+    flex: 1,
+    padding: 20,
   },
-  input: { marginBottom: 16 },
+  backBtn: {
+    marginBottom: 10,
+  },
+  header: {
+    fontSize: 22,
+    textAlign: "center",
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  input: {
+    marginBottom: 15,
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 18,
+  },
   dateInput: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    padding: 18,
     borderRadius: 6,
-    padding: 16,
-    marginBottom: 16,
+    marginBottom: 15,
     borderWidth: 1,
+  },
+  btnText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
