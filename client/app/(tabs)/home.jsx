@@ -38,6 +38,9 @@ const Home = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [expenses, setExpenses] = useState([]);
   const [showAddOptions, setShowAddOptions] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [totalIncome, setTotalIncome] = useState(0);
 
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
@@ -66,23 +69,38 @@ const Home = ({ navigation }) => {
   const fetchExpenses = useCallback(async () => {
     const { data, error: userError } = await supabase.auth.getUser();
     const user = data?.user;
-
+  
     if (userError || !user) {
       console.error("User not logged in or error fetching user:", userError);
       return;
     }
-
-    const { data: expensesData, error } = await supabase
+  
+    // Fetch expenses
+    const { data: expensesData, error: expensesError } = await supabase
       .from("expenses")
       .select("*")
-      .eq("user_id", user.id)
-      .order("date", { ascending: false });
-
-    if (error) {
-      console.error("❌ Error fetching expenses:", error.message);
-    } else {
-      setExpenses(expensesData);
+      .eq("user_id", user.id);
+  
+    // Fetch income
+    const { data: incomeData, error: incomeError } = await supabase
+      .from("income")
+      .select("*")
+      .eq("user_id", user.id);
+  
+    if (expensesError || incomeError) {
+      console.error("❌ Error fetching transactions:", expensesError?.message, incomeError?.message);
+      return;
     }
+  
+    setExpenses(expensesData || []);
+  
+    const totalExpenses = (expensesData || []).reduce((sum, item) => sum + item.amount, 0);
+    const totalIncome = (incomeData || []).reduce((sum, item) => sum + item.amount, 0);
+
+    setExpenses(expensesData || []);
+    setTotalExpenses(totalExpenses);
+    setTotalIncome(totalIncome);
+    setBalance(totalIncome - totalExpenses);
   }, []);
 
   useFocusEffect(
@@ -95,7 +113,7 @@ const Home = ({ navigation }) => {
   const iconColor = colorScheme === "dark" ? "#FFFFFF" : "#333333";
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background}}>
       <ThemedView
         style={[styles.container, { backgroundColor: theme.background }]}
       >
@@ -105,8 +123,8 @@ const Home = ({ navigation }) => {
 
         <View style={[styles.balanceCard, { backgroundColor: containerBg }]}>
           <View>
-            <ThemedText>Total Balance</ThemedText>
-            <ThemedText style={styles.balanceText}>$5,038.24</ThemedText>
+            <ThemedText style={{ fontWeight: 'bold' }}>Total Balance</ThemedText>
+            <ThemedText style={styles.balanceText}>${balance.toFixed(2)}</ThemedText>
           </View>
           <TouchableOpacity style={styles.addBtn} onPress={() => setShowAddOptions(true)}>
             <Ionicons name="add" size={24} color="white" />
@@ -114,22 +132,21 @@ const Home = ({ navigation }) => {
         </View>
 
         <View style={styles.sectionRow}>
-          <View style={[styles.smallCard, { backgroundColor: containerBg }]}>
-            <ThemedText>This Month</ThemedText>
-            <View
-              style={[
-                styles.fakeGraph,
-                {
-                  backgroundColor:
-                    colorScheme === "dark" ? "#3a3f47" : "#d0f0d0",
-                },
-              ]}
-            />
-          </View>
-          <View style={[styles.smallCard, { backgroundColor: containerBg }]}>
-            <ThemedText>Bills Due</ThemedText>
-            <ThemedText style={styles.greenText}>3 items</ThemedText>
-          </View>
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: containerBg }]}
+            onPress={() => router.push("/expenses")}
+          >
+            <ThemedText style={{ fontWeight: 'bold' }}>Total Expenses</ThemedText>
+            <ThemedText style={styles.redText}>-${totalExpenses.toFixed(2)}</ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.smallCard, { backgroundColor: containerBg }]}
+            onPress={() => router.push("/income")}
+          >
+            <ThemedText style={{ fontWeight: 'bold' }}>Total Income</ThemedText>
+            <ThemedText style={styles.greenText}>+${totalIncome.toFixed(2)}</ThemedText>
+          </TouchableOpacity>
         </View>
 
         <ThemedText title style={styles.recentTitle}>
@@ -236,6 +253,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     alignSelf: "center",
   },
+  redText: {
+    color: 'red',
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
   balanceCard: {
     padding: 20,
     borderRadius: 12,
@@ -266,11 +288,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     elevation: 1,
-  },
-  fakeGraph: {
-    height: 40,
-    marginTop: 10,
-    borderRadius: 5,
   },
   greenText: {
     color: Colors.primary,

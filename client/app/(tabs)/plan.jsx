@@ -34,30 +34,34 @@ export default function GoalsAndBudgets() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      <ThemedView style={{ flex: 1, padding: 20 }}>
+      <ThemedView style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={theme.icon} />
           </TouchableOpacity>
 
-          {/* Goals Section */}
+          {/* Goals */}
           <ThemedText title style={styles.sectionTitle}>My Savings Goals</ThemedText>
-          {goals.map(goal => {
+          {goals.map((goal) => {
             const progress = Math.min(goal.saved_amount / goal.target_amount, 1);
             return (
-              <View key={goal.id} style={styles.card}>
-                <ThemedText>{goal.name}</ThemedText>
-                <ThemedText style={{ fontSize: 13 }}>
-                  ${goal.saved_amount} / ${goal.target_amount}
+              <View key={goal.id} style={[styles.card, { backgroundColor: theme.uibackground }]}>
+                <ThemedText style={styles.cardTitle}>{goal.name}</ThemedText>
+                <ThemedText style={styles.cardSub}>
+                  ${goal.saved_amount.toFixed(2)} / ${goal.target_amount.toFixed(2)}
                 </ThemedText>
                 <Progress.Bar
                   progress={progress}
                   color={theme.tint}
-                  height={12}
+                  unfilledColor={"#dcdcdc"}
+                  borderWidth={0}
+                  width={null}
+                  height={10}
+                  borderRadius={6}
                   style={{ marginTop: 8 }}
                 />
-                <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
-                  {progress * 100 >= 100
+                <ThemedText style={styles.progressLabel}>
+                  {progress === 1
                     ? "✅ Goal reached!"
                     : `Still need $${(goal.target_amount - goal.saved_amount).toFixed(2)}`}
                 </ThemedText>
@@ -69,27 +73,32 @@ export default function GoalsAndBudgets() {
             style={[styles.addBtn, { backgroundColor: theme.tint }]}
             onPress={() => router.push("/add_goal")}
           >
-            <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>+ Add Goal</ThemedText>
+            <ThemedText style={styles.addBtnText}>+ Add Goal</ThemedText>
           </TouchableOpacity>
 
-          {/* Budgets Section */}
+          {/* Budgets */}
           <ThemedText title style={styles.sectionTitle}>My Budgets</ThemedText>
-          {budgets.map(budget => {
+          {budgets.map((budget) => {
             const progress = Math.min(budget.spent / budget.limit, 1);
+            const isOver = progress >= 1;
             return (
-              <View key={budget.id} style={styles.card}>
-                <ThemedText>{budget.category}</ThemedText>
-                <ThemedText style={{ fontSize: 13 }}>
-                  ${budget.spent} / ${budget.limit}
+              <View key={budget.id} style={[styles.card, { backgroundColor: theme.uibackground }]}>
+                <ThemedText style={styles.cardTitle}>{budget.category}</ThemedText>
+                <ThemedText style={styles.cardSub}>
+                  ${budget.spent.toFixed(2)} / ${budget.limit.toFixed(2)}
                 </ThemedText>
                 <Progress.Bar
                   progress={progress}
-                  color={"red"}
-                  height={12}
+                  color={isOver ? "#ff4d4f" : "#4caf50"}
+                  unfilledColor={"#dcdcdc"}
+                  borderWidth={0}
+                  width={null}
+                  height={10}
+                  borderRadius={6}
                   style={{ marginTop: 8 }}
                 />
-                <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
-                  {progress >= 1
+                <ThemedText style={styles.progressLabel}>
+                  {isOver
                     ? "⚠️ Over budget!"
                     : `You have $${(budget.limit - budget.spent).toFixed(2)} left`}
                 </ThemedText>
@@ -98,31 +107,33 @@ export default function GoalsAndBudgets() {
           })}
 
           <TouchableOpacity
-            style={[styles.addBtn, { backgroundColor: "green" }]}
+            style={[styles.addBtn, { backgroundColor: "#4caf50" }]}
             onPress={() => router.push("/add_budget")}
           >
-            <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>Add Budget</ThemedText>
+            <ThemedText style={styles.addBtnText}>+ Add Budget</ThemedText>
           </TouchableOpacity>
 
-          {/* Insights / Recommendations */}
+          {/* Insights */}
           <ThemedText title style={styles.sectionTitle}>Insights</ThemedText>
-          <ThemedText style={{ fontSize: 14, marginBottom: 20 }}>
-            {budgets.some(b => b.spent > b.limit)
-              ? "You have exceeded one or more budgets this month."
-              : "You're on track with all your budgets!"}
-          </ThemedText>
-          {goals.map(goal => {
-            const monthsLeft = Math.ceil(
-              (goal.target_amount - goal.saved_amount) / (goal.monthly_contribution || 1)
-            );
-            return (
-              <ThemedText key={goal.id} style={{ fontSize: 14 }}>
-                {goal.saved_amount >= goal.target_amount
-                  ? `🎉 You've hit your ${goal.name} goal!`
-                  : `At this rate, you'll reach your ${goal.name} goal in ${monthsLeft} months.`}
-              </ThemedText>
-            );
-          })}
+          <View style={[styles.card, { backgroundColor: theme.uibackground }]}>
+            <ThemedText style={styles.insightText}>
+              {budgets.some(b => b.spent > b.limit)
+                ? "You’ve exceeded one or more budgets this month."
+                : "✅ You’re on track with all your budgets!"}
+            </ThemedText>
+            {goals.map(goal => {
+              const monthsLeft = Math.ceil(
+                (goal.target_amount - goal.saved_amount) / (goal.monthly_contribution || 1)
+              );
+              return (
+                <ThemedText key={goal.id} style={styles.insightText}>
+                  {goal.saved_amount >= goal.target_amount
+                    ? `🎉 You've hit your ${goal.name} goal!`
+                    : `At this rate, you'll reach your ${goal.name} goal in ${monthsLeft} month(s).`}
+                </ThemedText>
+              );
+            })}
+          </View>
         </ScrollView>
       </ThemedView>
     </SafeAreaView>
@@ -130,25 +141,55 @@ export default function GoalsAndBudgets() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    paddingTop: 30,
+  },
   backBtn: {
-    marginTop:20,
+    marginBottom: 12,
   },
   sectionTitle: {
     marginTop: 20,
     marginBottom: 10,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
   },
   card: {
     padding: 16,
     borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 12,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  cardTitle: {
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  cardSub: {
+    fontSize: 13,
+    marginTop: 4,
+  },
+  progressLabel: {
+    fontSize: 12,
+    marginTop: 6,
   },
   addBtn: {
-    padding: 14,
-    borderRadius: 20,
-    marginTop: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+    marginBottom: 10,
     alignItems: "center",
+  },
+  addBtnText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  insightText: {
+    fontSize: 13,
+    marginBottom: 6,
   },
 });

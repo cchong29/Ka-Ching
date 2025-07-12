@@ -20,65 +20,55 @@ import ThemedText from "@/components/ThemedText";
 
 const screenWidth = Dimensions.get("window").width;
 
-const ExpenseItem = ({ expense, theme, onPress }) => (
+const IncomeItem = ({ income, theme, onPress }) => (
   <TouchableOpacity
-    onPress={() => onPress(expense)}
+    onPress={() => onPress(income)}
     style={[
       styles.card,
       { backgroundColor: theme.uibackground, borderColor: theme.border },
     ]}
   >
     <ThemedText style={{ fontWeight: "600" }}>
-      {expense.title} - ${expense.amount.toFixed(2)}
+      {income.title} + ${income.amount.toFixed(2)}
     </ThemedText>
     <ThemedText style={{ fontSize: 13, color: theme.icon }}>
-      {expense.category} | {new Date(expense.date).toDateString()}
+      {income.category} | {new Date(income.date).toDateString()}
     </ThemedText>
   </TouchableOpacity>
 );
 
-const ExpensesDashboard = () => {
-  const [expenses, setExpenses] = useState([]);
+const IncomeDashboard = () => {
+  const [incomes, setIncomes] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
   useEffect(() => {
-    const fetchExpenses = async () => {
+    const fetchIncomes = async () => {
       const { data, error } = await supabase
-        .from("expenses")
+        .from("income")
         .select("*")
         .order("date", { ascending: false });
 
-      if (!error && data) setExpenses(data);
+      if (!error && data) setIncomes(data);
     };
 
-    fetchExpenses();
+    fetchIncomes();
   }, []);
 
-  const monthTotals = expenses.reduce((acc, expense) => {
-    const month = new Date(expense.date).getMonth();
+  const monthTotals = incomes.reduce((acc, income) => {
+    const month = new Date(income.date).getMonth();
     const match =
-      selectedCategory === "All" || expense.category === selectedCategory;
-    if (match) acc[month] = (acc[month] || 0) + expense.amount;
+      selectedCategory === "All" || income.category === selectedCategory;
+    if (match) acc[month] = (acc[month] || 0) + income.amount;
     return acc;
   }, {});
 
   const barChartData = {
     labels: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ],
     datasets: [
       {
@@ -100,7 +90,7 @@ const ExpensesDashboard = () => {
     },
   };
 
-  const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -115,20 +105,12 @@ const ExpensesDashboard = () => {
           </TouchableOpacity>
 
           <ThemedText title style={{ fontSize: 20, marginBottom: 16 }}>
-            Total Spent: ${totalSpent.toFixed(2)}
+            Total Income: ${totalIncome.toFixed(2)}
           </ThemedText>
 
           {/* Category Filter */}
           <View style={styles.filterWrap}>
-            {[
-              "All",
-              "Food",
-              "Transport",
-              "Shopping",
-              "Travel",
-              "Bills",
-              "Others",
-            ].map((cat) => (
+            {["All", "Salary", "Freelance", "Business", "Investments", "Others"].map((cat) => (
               <TouchableOpacity
                 key={cat}
                 onPress={() => setSelectedCategory(cat)}
@@ -136,9 +118,7 @@ const ExpensesDashboard = () => {
                   styles.filterBtn,
                   {
                     backgroundColor:
-                      selectedCategory === cat
-                        ? theme.tint
-                        : theme.uibackground,
+                      selectedCategory === cat ? theme.tint : theme.uibackground,
                     borderColor: theme.tint,
                   },
                 ]}
@@ -154,6 +134,7 @@ const ExpensesDashboard = () => {
             ))}
           </View>
 
+          {/* Chart + Simulated Y-axis */}
           <View
             style={{
               flexDirection: "row",
@@ -162,7 +143,6 @@ const ExpensesDashboard = () => {
               marginTop: 10,
             }}
           >
-            {/* Simulated Y-axis */}
             <View
               style={{
                 justifyContent: "space-between",
@@ -171,8 +151,8 @@ const ExpensesDashboard = () => {
               }}
             >
               {[...Array(5)].map((_, i) => {
-                const maxVal = Math.max(...barChartData.datasets[0].data, 10); // avoid 0
-                const roundedMax = Math.ceil(maxVal / 10) * 10; // round to nearest 10
+                const maxVal = Math.max(...barChartData.datasets[0].data, 10);
+                const roundedMax = Math.ceil(maxVal / 10) * 10;
                 const yLabel = ((roundedMax / 4) * (4 - i)).toFixed(0);
                 return (
                   <Text
@@ -190,7 +170,6 @@ const ExpensesDashboard = () => {
               })}
             </View>
 
-            {/* Scrollable Bar Chart */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <BarChart
                 data={barChartData}
@@ -200,35 +179,35 @@ const ExpensesDashboard = () => {
                 verticalLabelRotation={30}
                 fromZero
                 showValuesOnTopOfBars
-                withVerticalLabels={true}
-                withHorizontalLabels={false} // hide default Y-axis
+                withVerticalLabels
+                withHorizontalLabels={false}
                 yAxisLabel=""
-                style={{ borderRadius: 12, marginLeft: 0 }} // removed left margin
+                style={{ borderRadius: 12, marginLeft: 0 }}
               />
             </ScrollView>
           </View>
 
-          {/* Expense List */}
+          {/* Income List */}
           <ThemedText title style={{ marginVertical: 16 }}>
-            Recent Expenses
+            Recent Income
           </ThemedText>
           <FlatList
-            data={expenses}
+            data={incomes}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <ExpenseItem
-                expense={item}
+              <IncomeItem
+                income={item}
                 theme={theme}
-                onPress={(expense) => {
+                onPress={(income) => {
                   router.push({
-                    pathname: "/expense_details",
+                    pathname: "/income_details",
                     params: {
-                      id: expense.id,
-                      title: expense.title,
-                      amount: expense.amount,
-                      date: expense.date,
-                      category: expense.category,
-                      note: expense.note,
+                      id: income.id,
+                      title: income.title,
+                      amount: income.amount,
+                      date: income.date,
+                      category: income.category,
+                      note: income.note,
                     },
                   });
                 }}
@@ -238,16 +217,16 @@ const ExpensesDashboard = () => {
           />
         </ScrollView>
 
-        {/* Add Expense FAB */}
+        {/* Add Income FAB */}
         <TouchableOpacity
-          onPress={() => router.push("/add_expense")}
+          onPress={() => router.push("/add_income")}
           style={[
             styles.fab,
             { backgroundColor: theme.tint, shadowColor: theme.icon },
           ]}
         >
           <Text style={{ color: "#fff", fontWeight: "bold" }}>
-            + Add Expense
+            + Add Income
           </Text>
         </TouchableOpacity>
       </ThemedView>
@@ -255,7 +234,7 @@ const ExpensesDashboard = () => {
   );
 };
 
-export default ExpensesDashboard;
+export default IncomeDashboard;
 
 const styles = StyleSheet.create({
   card: {
