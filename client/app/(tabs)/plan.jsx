@@ -79,8 +79,13 @@ export default function Plan() {
             <Ionicons name="arrow-back" size={24} color={theme.icon} />
           </TouchableOpacity>
 
+          {/* Page Heading */}
+          <ThemedText title style={styles.pageHeading}>
+            My Savings
+          </ThemedText>
+
           {/* Goals Section */}
-          <ThemedText title style={styles.sectionTitle}>My Savings Goals</ThemedText>
+          <ThemedText title style={styles.sectionTitle}>My Goals</ThemedText>
           {goals.length === 0 && (
             <ThemedText style={{ textAlign: "center", marginBottom: 12, color: theme.text }}>
               No goals yet. Tap “+ Add Goal” to create one.
@@ -89,24 +94,29 @@ export default function Plan() {
           {goals.map(g => {
             const progress = g.target_amount ? Math.min(g.saved_amount / g.target_amount, 1) : 0;
             return (
-              <View key={g.id} style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
-                <ThemedText style={{ fontWeight: "600" }}>{g.name}</ThemedText>
-                <ThemedText style={{ fontSize: 13, color: theme.icon }}>
-                  ${g.saved_amount.toFixed(2)} / ${g.target_amount.toFixed(2)}
-                </ThemedText>
-                <Progress.Bar
-                  progress={progress}
-                  color={theme.tint}
-                  width={Dimensions.get("window").width - 80}
-                  height={10}
-                  style={{ marginTop: 8, borderRadius: 5 }}
-                />
-                <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
-                  {progress >= 1
-                    ? "✅ Goal reached!"
-                    : `You need $${(g.target_amount - g.saved_amount).toFixed(2)} more`}
-                </ThemedText>
-              </View>
+              <TouchableOpacity
+                key={g.id}
+                onPress={() => router.push({ pathname: "/goal_details", params: { id: g.id } })}
+              >
+                <View style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+                  <ThemedText style={{ fontWeight: "600" }}>{g.name}</ThemedText>
+                  <ThemedText style={{ fontSize: 13, color: theme.icon }}>
+                    ${g.saved_amount.toFixed(2)} / ${g.target_amount.toFixed(2)}
+                  </ThemedText>
+                  <Progress.Bar
+                    progress={progress}
+                    color={theme.tint}
+                    width={Dimensions.get("window").width - 80}
+                    height={10}
+                    style={{ marginTop: 8, borderRadius: 5 }}
+                  />
+                  <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
+                    {progress >= 1
+                      ? "✅ Goal reached!"
+                      : `You need $${(g.target_amount - g.saved_amount).toFixed(2)} more`}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
             );
           })}
 
@@ -129,24 +139,29 @@ export default function Plan() {
             const limit = b.amount;
             const progress = limit ? Math.min(spent / limit, 1) : 0;
             return (
-              <View key={b.id} style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
-                <ThemedText style={{ fontWeight: "600" }}>{b.name}</ThemedText>
-                <ThemedText style={{ fontSize: 13, color: theme.icon }}>
-                  ${spent.toFixed(2)} / ${limit.toFixed(2)}
-                </ThemedText>
-                <Progress.Bar
-                  progress={progress}
-                  color={progress >= 1 ? "red" : theme.tint}
-                  width={Dimensions.get("window").width - 80}
-                  height={10}
-                  style={{ marginTop: 8, borderRadius: 5 }}
-                />
-                <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
-                  {progress >= 1
-                    ? "⚠️ Over budget!"
-                    : `You have $${(limit - spent).toFixed(2)} remaining`}
-                </ThemedText>
-              </View>
+              <TouchableOpacity
+                key={b.id}
+                onPress={() => router.push({ pathname: "/budget_details", params: { id: b.id } })}
+              >
+                <View style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+                  <ThemedText style={{ fontWeight: "600" }}>{b.name}</ThemedText>
+                  <ThemedText style={{ fontSize: 13, color: theme.icon }}>
+                    ${spent.toFixed(2)} / ${limit.toFixed(2)}
+                  </ThemedText>
+                  <Progress.Bar
+                    progress={progress}
+                    color={progress >= 1 ? "red" : theme.tint}
+                    width={Dimensions.get("window").width - 80}
+                    height={10}
+                    style={{ marginTop: 8, borderRadius: 5 }}
+                  />
+                  <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
+                    {progress >= 1
+                      ? "⚠️ Over budget!"
+                      : `You have $${(limit - spent).toFixed(2)} remaining`}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
             );
           })}
 
@@ -179,5 +194,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     marginVertical: 10,
+  },
+  pageHeading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
   },
 });

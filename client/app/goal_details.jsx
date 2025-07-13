@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { View, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import { SafeAreaView, TouchableOpacity, StyleSheet, ScrollView, View, Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/Colors";
+import * as Progress from "react-native-progress";
+
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
-import * as Progress from "react-native-progress";
+import ThemedButton from "@/components/ThemedButton";
 
 export default function GoalDetails() {
   const { id } = useLocalSearchParams();
@@ -17,9 +19,31 @@ export default function GoalDetails() {
 
   useEffect(() => {
     const fetchGoal = async () => {
-      const { data } = await supabase.from("goals").select("*").eq("id", id).single();
+      const { data } = await supabase
+        .from("goals")
+        .select("*")
+        .eq("id", id)
+        .single();
+
       setGoal(data);
     };
+
+    const handleDelete = async () => {
+      const confirm = window.confirm?.("Are you sure you want to delete this goal?") || 
+                      Alert.alert("Delete Goal", "Are you sure you want to delete this goal?", [
+                        { text: "Cancel", style: "cancel" },
+                        { text: "Delete", style: "destructive", onPress: async () => {
+                          const { error } = await supabase.from("goals").delete().eq("id", goal.id);
+                          if (error) {
+                            console.error("Error deleting goal:", error);
+                            Alert.alert("Error", "Failed to delete goal.");
+                          } else {
+                            router.back();
+                          }
+                        }},
+                      ]);
+    };
+
     fetchGoal();
   }, [id]);
 
@@ -29,27 +53,132 @@ export default function GoalDetails() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      <ThemedView style={{ flex: 1, padding: 20 }}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={theme.icon} />
-        </TouchableOpacity>
+      <ThemedView style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Back Button */}
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={theme.icon} />
+          </TouchableOpacity>
 
-        <ThemedText title style={styles.title}>{goal.name}</ThemedText>
-        <ThemedText style={{ marginBottom: 10 }}>
-          ${goal.saved_amount} of ${goal.target_amount}
-        </ThemedText>
-        <Progress.Bar progress={progress} color={theme.tint} height={14} />
+          {/* Goal Title */}
+          <ThemedText title style={styles.title}>
+            {goal.name}
+          </ThemedText>
 
-        <ThemedText title style={styles.subTitle}>Related Transactions</ThemedText>
-        {/* you could later filter transactions by a goal_id if you store that on expenses/incomes */}
-        <ThemedText style={{ fontSize: 14 }}>No linked transactions yet.</ThemedText>
+          {/* Progress Info */}
+          <ThemedText style={styles.subtitle}>
+            ${goal.saved_amount.toFixed(2)} / ${goal.target_amount.toFixed(2)}
+          </ThemedText>
+          <Progress.Bar
+            progress={progress}
+            color={theme.tint}
+            height={14}
+            borderRadius={10}
+            width={null}
+            style={{ marginTop: 8 }}
+          />
+          <ThemedText style={styles.progressLabel}>
+            {progress >= 1
+              ? "✅ Goal completed!"
+              : `You need $${(goal.target_amount - goal.saved_amount).toFixed(2)} more`}
+          </ThemedText>
+
+          {/* Goal Details */}
+          <View style={styles.detailsBox}>
+            <ThemedText style={styles.detailItem}>Target Amount: ${goal.target_amount.toFixed(2)}</ThemedText>
+            <ThemedText style={styles.detailItem}>Saved Amount: ${goal.saved_amount.toFixed(2)}</ThemedText>
+            <ThemedText style={styles.detailItem}>Target Date: {new Date(goal.target_date).toDateString()}</ThemedText>
+            <ThemedText style={styles.detailItem}>Priority: {goal.priority}</ThemedText>
+          </View>
+
+          {/* Edit & Delete Buttons */}
+          <View style={styles.buttonRow}>
+            <ThemedButton onPress={() => router.push({ pathname: "/edit_goal", params: { id: goal.id } })} style={[styles.button, styles.modifyBtn]}>
+              <ThemedText style={styles.buttonText}>Edit</ThemedText>
+            </ThemedButton>
+            <ThemedButton
+              onPress={() =>
+                Alert.alert(
+                  "Confirm Delete",
+                  "Are you sure you want to delete this goal?",
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                      text: "Delete",
+                      style: "destructive",
+                      onPress: async () => {
+                        const { error } = await supabase.from("goals").delete().eq("id", goal.id);
+                        if (!error) {
+                          router.back();
+                        } else {
+                          console.error("Delete failed:", error);
+                          Alert.alert("Error", "Failed to delete the goal.");
+                        }
+                      },
+                    },
+                  ]
+                )
+              }
+              style={[styles.button, styles.deleteBtn]}
+            >
+              <ThemedText style={styles.buttonText}>Delete</ThemedText>
+            </ThemedButton>
+          </View>
+
+          {/* Linked Transactions Placeholder */}
+          <ThemedText title style={styles.sectionTitle}>Linked Transactions</ThemedText>
+          <ThemedText style={{ fontSize: 14, color: theme.icon }}>
+            No linked transactions yet.
+          </ThemedText>
+        </ScrollView>
       </ThemedView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
   backBtn: { marginBottom: 12 },
-  title: { fontSize: 20, marginBottom: 10, fontWeight: "bold" },
-  subTitle: { marginTop: 20, marginBottom: 10, fontSize: 16, fontWeight: "bold" },
+  title: { fontSize: 22, fontWeight: "bold", marginBottom: 8 },
+  subtitle: { fontSize: 16, marginBottom: 6 },
+  progressLabel: { marginTop: 8, fontSize: 13, color: "gray" },
+  detailsBox: {
+    marginTop: 20,
+    marginBottom: 10,
+    backgroundColor: "#f0f0f0",
+    padding: 16,
+    borderRadius: 10,
+  },
+  detailItem: {
+    marginBottom: 6,
+    fontSize: 14,
+  },
+  sectionTitle: {
+    marginTop: 20,
+    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 10,
+    gap: 10,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  modifyBtn: {
+    backgroundColor: "#137547",
+  },
+  deleteBtn: {
+    backgroundColor: "#D32F2F",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
 });
