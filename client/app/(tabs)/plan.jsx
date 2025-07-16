@@ -18,6 +18,14 @@ import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 
+const tips = [
+  "Track your spending daily for better control.",
+  "Set realistic goals to stay motivated.",
+  "Review your budget weekly and adjust accordingly.",
+  "Automate savings to build discipline.",
+  "Avoid impulse purchases by planning ahead.",
+];
+
 export default function Plan() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme] ?? Colors.light;
@@ -31,34 +39,29 @@ export default function Plan() {
     const { data: userData, error: userError } = await supabase.auth.getUser();
     const user = userData?.user;
     if (userError || !user) return;
-  
-    // Fetch budgets and goals for user
+
     const [{ data: goalsData }, { data: budgetsData }] = await Promise.all([
       supabase.from("goals").select("*").eq("user_id", user.id),
       supabase.from("budgets").select("*").eq("user_id", user.id),
     ]);
-  
-    // Fetch all expenses for user
+
     const { data: expensesData } = await supabase.from("expenses").select("*").eq("user_id", user.id);
-  
-    // Calculate spent_amount per budget by summing expenses matching budget category & within budget timeframe
+
     const updatedBudgets = budgetsData.map((budget) => {
-      // Parse dates from budget
       const start = new Date(budget.start_date);
       const end = new Date(budget.end_date);
-  
-      // Sum expenses amount matching category and date range
+
       const spent_amount = expensesData
-        .filter(exp => 
+        .filter(exp =>
           exp.category === budget.category &&
           new Date(exp.date) >= start &&
           new Date(exp.date) <= end
         )
         .reduce((sum, exp) => sum + exp.amount, 0);
-  
+
       return { ...budget, spent_amount };
     });
-  
+
     setGoals(goalsData || []);
     setBudgets(updatedBudgets || []);
   }, []);
@@ -68,6 +71,24 @@ export default function Plan() {
       fetchData();
     }, [fetchData])
   );
+
+  // Progress summary calculations
+  const activeGoalsCount = goals.length;
+  const completedGoalsCount = goals.filter(g => g.saved_amount >= g.target_amount).length;
+  const avgProgress =
+    activeGoalsCount > 0
+      ? goals.reduce((sum, g) => sum + (g.saved_amount / g.target_amount || 0), 0) /
+        activeGoalsCount
+      : 0;
+
+  let motivationalQuote = "Let's get started!";
+  if (avgProgress > 0.25 && avgProgress <= 0.5) motivationalQuote = "Making great progress!";
+  else if (avgProgress > 0.5 && avgProgress <= 0.75) motivationalQuote = "You're over halfway there!";
+  else if (avgProgress > 0.75 && avgProgress < 1) motivationalQuote = "You're almost there!";
+  else if (avgProgress >= 1) motivationalQuote = "Goal achieved! 🎉";
+
+  // Tip of the Day (rotate randomly)
+  const tipOfTheDay = tips[Math.floor(Math.random() * tips.length)];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -82,6 +103,27 @@ export default function Plan() {
           {/* Page Heading */}
           <ThemedText title style={styles.pageHeading}>
             My Savings
+          </ThemedText>
+
+          {/* Progress Summary Cards */}
+          <ThemedView style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
+            <ThemedView style={[styles.summaryCard, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+              <ThemedText style={styles.summaryNumber}>{activeGoalsCount}</ThemedText>
+              <ThemedText style={styles.summaryLabel}>Active Goals</ThemedText>
+            </ThemedView>
+            <ThemedView style={[styles.summaryCard, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+              <ThemedText style={styles.summaryNumber}>{completedGoalsCount}</ThemedText>
+              <ThemedText style={styles.summaryLabel}>Completed Goals</ThemedText>
+            </ThemedView>
+            <ThemedView style={[styles.summaryCard, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+              <ThemedText style={styles.summaryNumber}>{Math.round(avgProgress * 100)}%</ThemedText>
+              <ThemedText style={styles.summaryLabel}>Average Progress</ThemedText>
+            </ThemedView>
+          </ThemedView>
+
+          {/* Motivational Quote */}
+          <ThemedText style={{ fontStyle: "italic", fontSize: 16, marginBottom: 12, color: theme.tint, textAlign: "center" }}>
+            {motivationalQuote}
           </ThemedText>
 
           {/* Goals Section */}
@@ -166,11 +208,19 @@ export default function Plan() {
           })}
 
           <TouchableOpacity
-            style={[styles.addBtn, { backgroundColor: theme.tint }]}
+            style={[styles.addBtn, { backgroundColor: theme.tint, marginBottom: 40 }]}
             onPress={() => router.push("/add_budget")}
           >
             <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>+ Add Budget</ThemedText>
           </TouchableOpacity>
+
+          {/* Tip of the Day */}
+          <ThemedText title style={[styles.sectionTitle, { marginTop: 40 }]}>Tip of the Day</ThemedText>
+          <ThemedView style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+            <ThemedText style={{ fontStyle: "italic", fontSize: 15, color: theme.tint }}>
+              "{tipOfTheDay}"
+            </ThemedText>
+          </ThemedView>
 
         </ScrollView>
       </ThemedView>
@@ -199,6 +249,25 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
+  },
+  summaryCard: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: "center",
+    marginHorizontal: 5,
+    elevation: 2,
+  },
+  summaryNumber: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  summaryLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
     textAlign: "center",
   },
 });

@@ -121,25 +121,28 @@ export default function EditGoal() {
           style={[styles.input, { borderColor: theme.icon, borderWidth: 1 }]}
         />
 
-        <ModalSelector
-          data={[
-            { key: "High", label: "High" },
-            { key: "Medium", label: "Medium" },
-            { key: "Low", label: "Low" },
-          ]}
-          initValue="Select Priority"
-          onChange={(option) => setPriority(option.key)}
-          style={[styles.selector, { borderColor: theme.icon, borderWidth: 1 }]}
-          initValueTextStyle={{ color: priority ? theme.text : "#999" }}
-          selectTextStyle={{ color: theme.text, padding: 10 }}
-          optionTextStyle={{ color: theme.text }}
-          optionContainerStyle={{ backgroundColor: theme.background }}
-          cancelTextStyle={{ color: theme.text }}
-        >
-          <ThemedText>
-            {priority || "Select Priority"}
-          </ThemedText>
-        </ModalSelector>
+        <View style={[styles.selectorWrapper, { backgroundColor: theme.uibackground, borderColor: theme.icon }]}>
+          <ModalSelector
+            data={[
+              { key: "High", label: "High" },
+              { key: "Medium", label: "Medium" },
+              { key: "Low", label: "Low" },
+            ]}
+            initValue="Select Priority"
+            onChange={(option) => setPriority(option.key)}
+            optionTextStyle={{ color: theme.text }}
+            optionContainerStyle={{ backgroundColor: theme.background }}
+            cancelStyle={{ backgroundColor: theme.background }}
+            cancelTextStyle={{ color: theme.text }}
+            initValueTextStyle={{ color: priority ? theme.text : "#999999", fontSize: 16 }}
+            selectTextStyle={{ color: theme.text, fontSize: 16 }}
+            style={{ flex: 1 }}
+          >
+            <ThemedText>{priority || "Select Priority"}</ThemedText>
+          </ModalSelector>
+
+          <Ionicons name="chevron-down" size={20} color={theme.icon} />
+        </View>
 
         <TouchableOpacity
           style={[styles.dateInput, { borderColor: theme.icon, backgroundColor: theme.uibackground }]}
@@ -184,5 +187,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  selectorWrapper: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 18,
+    borderRadius: 6,
+    marginBottom: 15,
+    borderWidth: 1,
   },
 });
