@@ -88,13 +88,11 @@ export default function Profile() {
             <Item icon={<Feather name="user" size={20} />} label="Email" theme={theme} />
             <Item icon={<Feather name="lock" size={20} />} label="Change Password" theme={theme} onPress={() => router.push('/changepw')} />
             <Item icon={<Feather name="link" size={20} />} label="Linked Banks" theme={theme} />
-            <Item icon={<Feather name="bell" size={20} />} label="Notifications" theme={theme} />
             <Item icon={<Feather name="sun" size={20} />} label={`${theme === 'light' ? 'Dark' : 'Light'} Mode`} theme={theme} onPress={toggleTheme} />
           </Section>
 
           {/* Support and Legal */}
           <Section title="Support and Legal" theme={theme}>
-            <Item icon={<AntDesign name="questioncircleo" size={20} />} label="Help & Feedback" theme={theme} onPress={() => router.push('/(auth)/feedback')} />
             <Item icon={<Feather name="file-text" size={20} />} label="Terms of Service" theme={theme} onPress={() => router.push('/(auth)/t&c')} />
             <Item icon={<Feather name="shield" size={20} />} label="Privacy Policy" theme={theme} onPress={() => router.push('/(auth)/privacy')} />
           </Section>

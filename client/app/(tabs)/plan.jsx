@@ -33,20 +33,40 @@ export default function Plan() {
 
   const [goals, setGoals] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  const [totalBalance, setTotalBalance] = useState(0);
+  const [monthlyAvgExpenses, setMonthlyAvgExpenses] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch from Supabase
+  // Fetch data from Supabase
   const fetchData = useCallback(async () => {
+    setLoading(true);
     const { data: userData, error: userError } = await supabase.auth.getUser();
     const user = userData?.user;
-    if (userError || !user) return;
+    if (userError || !user) {
+      setLoading(false);
+      return;
+    }
 
-    const [{ data: goalsData }, { data: budgetsData }] = await Promise.all([
+    const [goalsResponse, budgetsResponse, incomeResponse, expensesResponse] = await Promise.all([
       supabase.from("goals").select("*").eq("user_id", user.id),
       supabase.from("budgets").select("*").eq("user_id", user.id),
+      supabase.from("income").select("amount").eq("user_id", user.id),
+      supabase.from("expenses").select("amount, category, date").eq("user_id", user.id),
     ]);
 
-    const { data: expensesData } = await supabase.from("expenses").select("*").eq("user_id", user.id);
+    const goalsData = goalsResponse.data || [];
+    const budgetsData = budgetsResponse.data || [];
+    const incomeData = incomeResponse.data || [];
+    const expensesData = expensesResponse.data || [];
 
+    // Calculate total income and total expenses
+    const totalIncome = incomeData.reduce((sum, inc) => sum + inc.amount, 0);
+    const totalExpenses = expensesData.reduce((sum, exp) => sum + exp.amount, 0);
+
+    const computedBalance = totalIncome - totalExpenses;
+    setTotalBalance(computedBalance);
+
+    // Calculate spent amount for each budget
     const updatedBudgets = budgetsData.map((budget) => {
       const start = new Date(budget.start_date);
       const end = new Date(budget.end_date);
@@ -62,8 +82,20 @@ export default function Plan() {
       return { ...budget, spent_amount };
     });
 
-    setGoals(goalsData || []);
-    setBudgets(updatedBudgets || []);
+    // Calculate average monthly expenses (for emergency fund)
+    let expensesByMonth = {};
+    expensesData.forEach((exp) => {
+      const dt = new Date(exp.date);
+      const key = `${dt.getFullYear()}-${dt.getMonth() + 1}`;
+      expensesByMonth[key] = (expensesByMonth[key] || 0) + exp.amount;
+    });
+    const monthsCount = Object.keys(expensesByMonth).length || 1;
+    const avgMonthly = Object.values(expensesByMonth).reduce((a, b) => a + b, 0) / monthsCount;
+    setMonthlyAvgExpenses(avgMonthly);
+
+    setGoals(goalsData);
+    setBudgets(updatedBudgets);
+    setLoading(false);
   }, []);
 
   useFocusEffect(
@@ -87,8 +119,12 @@ export default function Plan() {
   else if (avgProgress > 0.75 && avgProgress < 1) motivationalQuote = "You're almost there!";
   else if (avgProgress >= 1) motivationalQuote = "Goal achieved! 🎉";
 
-  // Tip of the Day (rotate randomly)
+  // Tip of the Day (random)
   const tipOfTheDay = tips[Math.floor(Math.random() * tips.length)];
+
+  // Emergency Fund calculations
+  const emergencyTarget = monthlyAvgExpenses * 3; // avg monthly expenses * 3
+  const emergencyProgress = emergencyTarget ? Math.min(totalBalance / emergencyTarget, 1) : 0;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -157,10 +193,23 @@ export default function Plan() {
                       ? "✅ Goal reached!"
                       : `You need $${(g.target_amount - g.saved_amount).toFixed(2)} more`}
                   </ThemedText>
+
+                  {g.monthly_saving && g.monthly_saving > 0 && progress < 1 && (
+                    <>
+                      <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
+                        Currently saving ${g.monthly_saving}/month. You have {Math.ceil((g.target_amount - g.saved_amount) / g.monthly_saving)} months left!
+                      </ThemedText>
+                      {g.created_at && (
+                        <ThemedText style={{ fontSize: 12, color: theme.icon, marginTop: 4 }}>
+                          Estimated completion: {new Date(new Date(g.created_at).getTime() + Math.ceil((g.target_amount - g.saved_amount) / g.monthly_saving) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                        </ThemedText>
+                      )}
+                    </>
+                  )}
                 </View>
-              </TouchableOpacity>
-            );
-          })}
+            </TouchableOpacity>
+          );
+        })}
 
           <TouchableOpacity
             style={[styles.addBtn, { backgroundColor: theme.tint }]}
@@ -213,6 +262,34 @@ export default function Plan() {
           >
             <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>+ Add Budget</ThemedText>
           </TouchableOpacity>
+
+          {/* Emergency Fund Section */}
+          <ThemedText title style={[styles.sectionTitle]}>Emergency Fund</ThemedText>
+          <View style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
+            <ThemedText>Total Balance:</ThemedText>
+            <ThemedText style={{ fontWeight: "bold", fontSize: 18, marginVertical: 8 }}>
+              ${totalBalance.toFixed(2)}
+            </ThemedText>
+
+            <ThemedText>Recommended Emergency Fund:</ThemedText>
+            <ThemedText style={{ fontWeight: "bold", fontSize: 18, marginVertical: 8 }}>
+              ${emergencyTarget.toFixed(2)}
+            </ThemedText>
+
+            <Progress.Bar
+              progress={emergencyProgress}
+              color={theme.tint}
+              width={Dimensions.get("window").width - 80}
+              height={12}
+              style={{ borderRadius: 6 }}
+            />
+
+            <ThemedText style={{ marginTop: 8, fontSize: 14 }}>
+              {emergencyProgress >= 1
+                ? "Great! Your emergency fund goal is met! 🎉"
+                : `You're ${(emergencyProgress * 100).toFixed(1)}% there!`}
+            </ThemedText>
+          </View>
 
           {/* Tip of the Day */}
           <ThemedText title style={[styles.sectionTitle, { marginTop: 40 }]}>Tip of the Day</ThemedText>

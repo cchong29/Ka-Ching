@@ -29,6 +29,7 @@ export default function EditGoal() {
   const [name, setName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
   const [savedAmount, setSavedAmount] = useState("");
+  const [monthlySaving, setMonthlySaving] = useState("");
   const [priority, setPriority] = useState("");
   const [targetDate, setTargetDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -50,6 +51,7 @@ export default function EditGoal() {
       setName(data.name);
       setTargetAmount(String(data.target_amount));
       setSavedAmount(String(data.saved_amount));
+      setMonthlySaving(String(data.monthly_saving));
       setPriority(data.priority);
       setTargetDate(new Date(data.target_date));
     };
@@ -60,6 +62,7 @@ export default function EditGoal() {
   const handleUpdate = async () => {
     const parsedTarget = parseFloat(targetAmount);
     const parsedSaved = parseFloat(savedAmount || "0");
+    const parsedMonthly = parseFloat(monthlySaving || "0");
 
     if (!name || isNaN(parsedTarget) || parsedTarget <= 0) {
       Alert.alert("Invalid input", "Please enter valid goal details.");
@@ -74,6 +77,7 @@ export default function EditGoal() {
         name,
         target_amount: parsedTarget,
         saved_amount: parsedSaved,
+        monthly_saving: parsedMonthly,
         target_date: targetDate.toISOString(),
         priority,
         progress,
@@ -117,6 +121,14 @@ export default function EditGoal() {
           placeholder="Amount already saved"
           value={savedAmount}
           onChangeText={setSavedAmount}
+          keyboardType="decimal-pad"
+          style={[styles.input, { borderColor: theme.icon, borderWidth: 1 }]}
+        />
+
+        <ThemedTextInput
+          placeholder="Monthly saving amount"
+          value={monthlySaving}
+          onChangeText={setMonthlySaving}
           keyboardType="decimal-pad"
           style={[styles.input, { borderColor: theme.icon, borderWidth: 1 }]}
         />
@@ -178,7 +190,6 @@ const styles = StyleSheet.create({
   backBtn: { marginBottom: 12 },
   title: { fontSize: 20, marginBottom: 20, fontWeight: "bold", textAlign: "center" },
   input: { marginBottom: 16, borderRadius: 6, padding: 16 },
-  selector: { marginBottom: 16, borderRadius: 6 },
   dateInput: {
     padding: 18,
     borderRadius: 6,
