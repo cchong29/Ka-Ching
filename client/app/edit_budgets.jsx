@@ -98,6 +98,7 @@ export default function EditBudgets() {
           <ModalSelector
             data={[
               { key: "Food", label: "Food" },
+              { key: "Grocery", label: "Grocery" },
               { key: "Transport", label: "Transport" },
               { key: "Shopping", label: "Shopping" },
               { key: "Travel", label: "Travel" },
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   backBtn: {
-    marginBottom: 10,
+    marginTop: 20,
   },
   header: {
     fontSize: 22,

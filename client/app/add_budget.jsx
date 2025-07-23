@@ -93,6 +93,7 @@ export default function AddBudget() {
           <ModalSelector
             data={[
               { key: "Food", label: "Food" },
+              { key: "Grocery", label: "Grocery" },
               { key: "Transport", label: "Transport" },
               { key: "Shopping", label: "Shopping" },
               { key: "Travel", label: "Travel" },

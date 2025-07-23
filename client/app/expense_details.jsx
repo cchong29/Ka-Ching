@@ -15,6 +15,8 @@ import { Colors } from "@/constants/Colors";
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
 import ThemedButton from "@/components/ThemedButton";
+import { useFocusEffect } from "expo-router";
+import { useState, useCallback } from "react";
 
 export default function ExpenseDetails() {
   const colorScheme = useColorScheme();
@@ -23,37 +25,60 @@ export default function ExpenseDetails() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
+  const [expense, setExpense] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchExpense = async () => {
+        const { data, error } = await supabase
+          .from("expenses")
+          .select("*")
+          .eq("id", params.id)
+          .single();
+
+        if (error) {
+          console.error("❌ Failed to fetch expense:", error.message);
+          return;
+        }
+
+        setExpense(data);
+      };
+
+      fetchExpense();
+    }, [params.id])
+  );
+
   const handleDelete = () => {
     Alert.alert(
-      'Confirm Deletion',
-      'Are you sure you want to delete this expense?',
+      "Confirm Deletion",
+      "Are you sure you want to delete this expense?",
       [
         {
-          text: 'Cancel',
-          style: 'cancel',
+          text: "Cancel",
+          style: "cancel",
         },
         {
-          text: 'Delete',
-          style: 'destructive',
+          text: "Delete",
+          style: "destructive",
           onPress: async () => {
             try {
               const { error } = await supabase
-                .from('expenses')
+                .from("expenses")
                 .delete()
-                .eq('id', params.id);
-  
+                .eq("id", params.id);
+
               if (error) {
-                console.error('❌ Delete failed:', error.message);
-                Alert.alert('Error', 'Could not delete expense');
+                console.error("❌ Delete failed:", error.message);
+                Alert.alert("Error", "Could not delete expense");
                 return;
               }
-  
-              Alert.alert('Deleted', 'Expense has been deleted ✅', [
-                { text: 'OK', onPress: () => router.back() },
+
+              Alert.alert("Deleted", "Expense has been deleted ✅", [
+                { text: "OK", onPress: () => router.back() },
               ]);
             } catch (err) {
-              console.error('❌ Delete error:', err);
-              Alert.alert('Error', 'Something went wrong');
+              console.error("❌ Delete error:", err);
+              Alert.alert("Error", "Something went wrong");
             }
           },
         },
@@ -83,30 +108,48 @@ export default function ExpenseDetails() {
           <Ionicons name="arrow-back" size={24} color={theme.icon} />
         </TouchableOpacity>
 
-        <ThemedText title style={styles.title}>
-          {params.title}
-        </ThemedText>
+        {expense ? (
+          <>
+            <ThemedText title style={styles.title}>
+              {expense.title}
+            </ThemedText>
 
-        <ThemedView
-          style={[
-            styles.card,
-            {
-              backgroundColor: theme.uibackground,
-              shadowColor: theme.shadow,
-            },
-          ]}
-        >
-          <DetailRow label="Amount" value={`$${Number(params.amount).toFixed(2)}`} />
-          <DetailRow label="Date" value={new Date(params.date).toDateString()} />
-          <DetailRow label="Category" value={params.category} />
-          <DetailRow label="Note" value={params.note || "—"} />
-        </ThemedView>
+            <ThemedView
+              style={[
+                styles.card,
+                {
+                  backgroundColor: theme.uibackground,
+                  shadowColor: theme.shadow,
+                },
+              ]}
+            >
+              <DetailRow
+                label="Amount"
+                value={`$${Number(expense.amount).toFixed(2)}`}
+              />
+              <DetailRow
+                label="Date"
+                value={new Date(expense.date).toDateString()}
+              />
+              <DetailRow label="Category" value={expense.category} />
+              <DetailRow label="Note" value={expense.note || "—"} />
+            </ThemedView>
+          </>
+        ) : (
+          <ThemedText>Loading...</ThemedText>
+        )}
 
         <View style={styles.buttonRow}>
-          <ThemedButton onPress={handleModify} style={[styles.button, styles.modifyBtn]}>
+          <ThemedButton
+            onPress={handleModify}
+            style={[styles.button, styles.modifyBtn]}
+          >
             <ThemedText style={styles.buttonText}>Edit</ThemedText>
           </ThemedButton>
-          <ThemedButton onPress={handleDelete} style={[styles.button, styles.deleteBtn]}>
+          <ThemedButton
+            onPress={handleDelete}
+            style={[styles.button, styles.deleteBtn]}
+          >
             <ThemedText style={styles.buttonText}>Delete</ThemedText>
           </ThemedButton>
         </View>

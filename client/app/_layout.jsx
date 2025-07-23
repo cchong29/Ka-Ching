@@ -47,6 +47,10 @@ export default function RootLayout() {
       <ThemeProvider>
         <NavigationWrapper>
           <Stack linking={linking}>
+          <Stack.Screen name="income" options={{ headerShown: false }} />
+
+            <Stack.Screen name="edit_budgets" options={{ headerShown: false }} />
+            <Stack.Screen name="goal_details" options={{ headerShown: false }} />
             <Stack.Screen name="budget_details" options={{ headerShown: false }} />
             <Stack.Screen name="expense_details" options={{ headerShown: false }} />
             <Stack.Screen name="add_budget" options={{ headerShown: false }} />

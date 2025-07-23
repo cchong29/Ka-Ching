@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   useColorScheme,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "expo-router";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -24,23 +25,34 @@ export default function BudgetDetails() {
 
   const [budget, setBudget] = useState(null);
 
-  useEffect(() => {
-    const fetchBudget = async () => {
-      const { data, error } = await supabase
-        .from("budgets")
-        .select("*")
-        .eq("id", id)
-        .single();
 
-      if (error) {
-        Alert.alert("Error", "Failed to fetch budget");
-      } else {
-        setBudget(data);
-      }
-    };
-
-    fetchBudget();
+  const fetchBudget = useCallback(async () => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return;
+  
+    const { data: budgetData, error } = await supabase
+      .from("budgets")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+  
+    if (error) {
+      Alert.alert("Error", "Failed to fetch budget");
+      setBudget(null);
+    } else {
+      setBudget(budgetData);
+    }
   }, [id]);
+  
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchBudget();
+    }, [fetchBudget])
+  );
+
+ 
 
   const handleDelete = () => {
     Alert.alert(
