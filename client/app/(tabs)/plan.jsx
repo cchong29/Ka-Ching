@@ -307,7 +307,7 @@ export default function Plan() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  backBtn: { marginBottom: 12 },
+  backBtn: { marginTop: 20 },
   sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
   card: {
     padding: 16,

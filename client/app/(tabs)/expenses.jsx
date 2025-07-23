@@ -16,6 +16,8 @@ import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/Colors";
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
+import { useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -37,18 +39,28 @@ const ExpensesDashboard = () => {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      const { data, error } = await supabase
-        .from("expenses")
-        .select("*")
-        .order("date", { ascending: false });
+  const fetchExpenses = useCallback(async () => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return;
 
-      if (!error && data) setExpenses(data);
-    };
+    const { data: expensesData } = await supabase
+      .from("expenses")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("date", { ascending: false })
+      .limit(10);
 
-    fetchExpenses();
+    
+
+    setExpenses(expensesData || []);
+    
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchExpenses();
+    }, [fetchExpenses])
+  );
 
   const monthTotals = expenses.reduce((acc, expense) => {
     const month = new Date(expense.date).getMonth();
@@ -248,6 +260,6 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   backBtn: {
-    marginBottom: 12,
+    marginTop: 20,
   },
 });

@@ -184,12 +184,12 @@ const Login = ({ promptAsync, isSigningIn, apple }) => {
       </Text>
     </TouchableOpacity>
 
-    <AppleAuthentication.AppleAuthenticationButton
+    {Platform.OS === 'ios' && AppleAuthentication.isAvailableAsync && (<AppleAuthentication.AppleAuthenticationButton
         buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
         buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
         cornerRadius={5}
         style={{ width: '80%', height: 40 }}
-        onPress={apple}/>
+        onPress={apple}/> )}
 
     <ConsentText />
     
