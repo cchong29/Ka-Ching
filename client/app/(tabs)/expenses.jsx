@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import {
-  View,
   FlatList,
-  Text,
   TouchableOpacity,
   Dimensions,
   ScrollView,
   StyleSheet,
   SafeAreaView,
+  Text,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -20,18 +19,12 @@ import ThemedText from "@/components/ThemedText";
 
 const screenWidth = Dimensions.get("window").width;
 
-const ExpenseItem = ({ expense, theme, onPress }) => (
-  <TouchableOpacity
-    onPress={() => onPress(expense)}
-    style={[
-      styles.card,
-      { backgroundColor: theme.uibackground, borderColor: theme.border },
-    ]}
-  >
+const ExpenseItem = ({ expense, onPress }) => (
+  <TouchableOpacity onPress={() => onPress(expense)} style={styles.card}>
     <ThemedText style={{ fontWeight: "600" }}>
       {expense.title} - ${expense.amount.toFixed(2)}
     </ThemedText>
-    <ThemedText style={{ fontSize: 13, color: theme.icon }}>
+    <ThemedText style={{ fontSize: 13 }}>
       {expense.category} | {new Date(expense.date).toDateString()}
     </ThemedText>
   </TouchableOpacity>
@@ -59,11 +52,14 @@ const ExpensesDashboard = () => {
 
   const monthTotals = expenses.reduce((acc, expense) => {
     const month = new Date(expense.date).getMonth();
-    const match =
-      selectedCategory === "All" || expense.category === selectedCategory;
+    const match = selectedCategory === "All" || expense.category === selectedCategory;
     if (match) acc[month] = (acc[month] || 0) + expense.amount;
     return acc;
   }, {});
+
+  const currentMonth = new Date().getMonth();
+  const currentMonthSpending = monthTotals[currentMonth]?.toFixed(2) || "0.00";
+  const runningTotal = expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2);
 
   const barChartData = {
     labels: [
@@ -82,9 +78,7 @@ const ExpensesDashboard = () => {
     ],
     datasets: [
       {
-        data: Array.from({ length: 12 }, (_, i) =>
-          parseFloat((monthTotals[i] || 0).toFixed(2))
-        ),
+        data: Array.from({ length: 12 }, (_, i) => parseFloat((monthTotals[i] || 0).toFixed(2))),
       },
     ],
   };
@@ -100,35 +94,24 @@ const ExpensesDashboard = () => {
     },
   };
 
-  const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <ThemedView style={{ flex: 1, padding: 20 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Back Button */}
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backBtn}
-          >
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={theme.icon} />
           </TouchableOpacity>
 
-          <ThemedText title style={{ fontSize: 20, marginBottom: 16 }}>
-            Total Spent: ${totalSpent.toFixed(2)}
+          <ThemedText title style={{ fontSize: 20, marginBottom: 8 }}>
+            Total Spent: ${runningTotal}
+          </ThemedText>
+          <ThemedText style={{ marginBottom: 16, color: theme.text }}>
+            This Month: ${currentMonthSpending}
           </ThemedText>
 
           {/* Category Filter */}
-          <View style={styles.filterWrap}>
-            {[
-              "All",
-              "Food",
-              "Transport",
-              "Shopping",
-              "Travel",
-              "Bills",
-              "Others",
-            ].map((cat) => (
+          <ThemedView style={styles.filterWrap}>
+            {["All", "Food", "Transport", "Shopping", "Travel", "Bills", "Others"].map((cat) => (
               <TouchableOpacity
                 key={cat}
                 onPress={() => setSelectedCategory(cat)}
@@ -136,61 +119,46 @@ const ExpensesDashboard = () => {
                   styles.filterBtn,
                   {
                     backgroundColor:
-                      selectedCategory === cat
-                        ? theme.tint
-                        : theme.uibackground,
+                      selectedCategory === cat ? theme.tint : theme.uibackground,
                     borderColor: theme.tint,
                   },
                 ]}
               >
-                <Text
+                <ThemedText
                   style={{
                     color: selectedCategory === cat ? "#fff" : theme.text,
                   }}
                 >
                   {cat}
-                </Text>
+                </ThemedText>
               </TouchableOpacity>
             ))}
-          </View>
+          </ThemedView>
 
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-start",
-              marginBottom: 20,
-              marginTop: 10,
-            }}
+          <ThemedView
+            style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 20, marginTop: 10 }}
           >
-            {/* Simulated Y-axis */}
-            <View
-              style={{
-                justifyContent: "space-between",
-                height: 220,
-                paddingBottom: 32,
-              }}
-            >
+            <ThemedView style={{ justifyContent: "space-between", height: 220, paddingBottom: 32 }}>
               {[...Array(5)].map((_, i) => {
-                const maxVal = Math.max(...barChartData.datasets[0].data, 10); // avoid 0
-                const roundedMax = Math.ceil(maxVal / 10) * 10; // round to nearest 10
+                const maxVal = Math.max(...barChartData.datasets[0].data, 10);
+                const roundedMax = Math.ceil(maxVal / 10) * 10;
                 const yLabel = ((roundedMax / 4) * (4 - i)).toFixed(0);
                 return (
                   <Text
                     key={i}
                     style={{
-                      color: theme.text,
                       fontSize: 12,
                       textAlign: "right",
                       paddingRight: 5,
+                      color: theme.text,
                     }}
                   >
                     ${yLabel}
                   </Text>
                 );
               })}
-            </View>
+            </ThemedView>
 
-            {/* Scrollable Bar Chart */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <BarChart
                 data={barChartData}
@@ -201,17 +169,17 @@ const ExpensesDashboard = () => {
                 fromZero
                 showValuesOnTopOfBars
                 withVerticalLabels={true}
-                withHorizontalLabels={false} // hide default Y-axis
+                withHorizontalLabels={false}
                 yAxisLabel=""
-                style={{ borderRadius: 12, marginLeft: 0 }} // removed left margin
+                style={{ borderRadius: 12, marginLeft: 0 }}
               />
             </ScrollView>
-          </View>
+          </ThemedView>
 
-          {/* Expense List */}
           <ThemedText title style={{ marginVertical: 16 }}>
             Recent Expenses
           </ThemedText>
+
           <FlatList
             data={expenses}
             keyExtractor={(item) => item.id.toString()}
@@ -238,17 +206,11 @@ const ExpensesDashboard = () => {
           />
         </ScrollView>
 
-        {/* Add Expense FAB */}
         <TouchableOpacity
           onPress={() => router.push("/add_expense")}
-          style={[
-            styles.fab,
-            { backgroundColor: theme.tint, shadowColor: theme.icon },
-          ]}
+          style={[styles.fab, { backgroundColor: theme.tint, shadowColor: theme.icon }]}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>
-            + Add Expense
-          </Text>
+          <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>+ Add Expense</ThemedText>
         </TouchableOpacity>
       </ThemedView>
     </SafeAreaView>

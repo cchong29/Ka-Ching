@@ -1,22 +1,19 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  View,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   Platform,
   useColorScheme,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 import { useFocusEffect } from "@react-navigation/native";
-
 import { supabase } from "../../lib/supabase";
-import { MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "expo-router";
 
 const iconMap = {
@@ -24,7 +21,6 @@ const iconMap = {
   Grocery: "local-grocery-store",
   Transport: "emoji-transportation",
   Travel: "flight",
-  // Add more category-to-icon mappings
 };
 
 const baseUrl =
@@ -34,17 +30,17 @@ const baseUrl =
     ? "http://10.0.2.2:4000"
     : "http://localhost:4000";
 
-const Home = ({ navigation }) => {
+export default function Home() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme] ?? Colors.light;
+  const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [expenses, setExpenses] = useState([]);
   const [showAddOptions, setShowAddOptions] = useState(false);
   const [balance, setBalance] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
-
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme] ?? Colors.light;
-  const router = useRouter()
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -61,43 +57,29 @@ const Home = ({ navigation }) => {
         setUsername(json.name);
       }
     };
-
     fetchUserName();
   }, []);
 
-  // Fetch expenses when focused
   const fetchExpenses = useCallback(async () => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-    if (userError || !user) {
-      console.error("User not logged in or error fetching user:", userError);
-      return;
-    }
-  
-    // Fetch the 10 most recent expenses ordered by date descending
-    const { data: expensesData, error: expensesError } = await supabase
+    if (userError || !user) return;
+
+    const { data: expensesData } = await supabase
       .from("expenses")
       .select("*")
       .eq("user_id", user.id)
       .order("date", { ascending: false })
       .limit(10);
-  
-    // Fetch all income to compute totalIncome and balance as before
-    const { data: incomeData, error: incomeError } = await supabase
+
+    const { data: incomeData } = await supabase
       .from("income")
       .select("*")
       .eq("user_id", user.id);
-  
-    if (expensesError || incomeError) {
-      console.error("❌ Error fetching transactions:", expensesError?.message, incomeError?.message);
-      return;
-    }
-  
-    setExpenses(expensesData || []);
-  
+
     const totalExpenses = (expensesData || []).reduce((sum, item) => sum + item.amount, 0);
     const totalIncome = (incomeData || []).reduce((sum, item) => sum + item.amount, 0);
-  
+
+    setExpenses(expensesData || []);
     setTotalExpenses(totalExpenses);
     setTotalIncome(totalIncome);
     setBalance(totalIncome - totalExpenses);
@@ -109,49 +91,49 @@ const Home = ({ navigation }) => {
     }, [fetchExpenses])
   );
 
-  const containerBg = colorScheme === "dark" ? "#2f2b3d" : "#fff";
-  const iconColor = colorScheme === "dark" ? "#FFFFFF" : "#333333";
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background}}>
-      <ThemedView
-        style={[styles.container, { backgroundColor: theme.background }]}
-      >
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+      <ThemedView style={styles.container}>
         <ThemedText title style={styles.welcomeText}>
           Hello {username}!
         </ThemedText>
 
-        <View style={[styles.balanceCard, { backgroundColor: containerBg }]}>
+        <ThemedView style={styles.balanceCard}>
           <View>
-            <ThemedText style={{ fontWeight: 'bold' }}>Total Balance</ThemedText>
-            <ThemedText style={styles.balanceText}>${balance.toFixed(2)}</ThemedText>
+            <ThemedText style={styles.labelText}>Total Balance</ThemedText>
+            <ThemedText style={[styles.balanceText, { color: Colors.primary }]}>
+              ${balance.toFixed(2)}
+            </ThemedText>
           </View>
           <TouchableOpacity style={styles.addBtn} onPress={() => setShowAddOptions(true)}>
             <Ionicons name="add" size={24} color="white" />
           </TouchableOpacity>
-        </View>
+        </ThemedView>
 
         <View style={styles.sectionRow}>
-          <TouchableOpacity
-            style={[styles.smallCard, { backgroundColor: containerBg }]}
-            onPress={() => router.push("/expenses")}
-          >
-            <ThemedText style={{ fontWeight: 'bold' }}>Total Expenses</ThemedText>
-            <ThemedText style={styles.redText}>-${totalExpenses.toFixed(2)}</ThemedText>
-          </TouchableOpacity>
+          <ThemedView style={styles.smallCard}>
+            <TouchableOpacity onPress={() => router.push("/expenses")}>
+              <ThemedText style={styles.labelText}>Total Expenses</ThemedText>
+              <ThemedText style={{ color: 'red', fontWeight: 'bold', marginTop: 8 }}>
+                -${totalExpenses.toFixed(2)}
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
 
-          <TouchableOpacity
-            style={[styles.smallCard, { backgroundColor: containerBg }]}
-            onPress={() => router.push("/income")}
-          >
-            <ThemedText style={{ fontWeight: 'bold' }}>Total Income</ThemedText>
-            <ThemedText style={styles.greenText}>+${totalIncome.toFixed(2)}</ThemedText>
-          </TouchableOpacity>
+          <ThemedView style={styles.smallCard}>
+            <TouchableOpacity onPress={() => router.push("/income")}>
+              <ThemedText style={styles.labelText}>Total Income</ThemedText>
+              <ThemedText style={{ color: Colors.primary, fontWeight: 'bold', marginTop: 8 }}>
+                +${totalIncome.toFixed(2)}
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
         </View>
 
         <ThemedText title style={styles.recentTitle}>
           Recent Activity
         </ThemedText>
+
         <FlatList
           data={expenses}
           keyExtractor={(item) => item.id.toString()}
@@ -160,43 +142,30 @@ const Home = ({ navigation }) => {
               onPress={() =>
                 router.push({
                   pathname: "/expense_details",
-                  params: {
-                    id: item.id,
-                    title: item.title,
-                    amount: item.amount,
-                    date: item.date,
-                    category: item.category,
-                    note: item.note,
-                  },
+                  params: { ...item },
                 })
               }
             >
-              <View
-                style={[styles.activityItem, { backgroundColor: containerBg }]}
-              >
+              <ThemedView style={styles.activityItem}>
                 <View style={styles.activityLeft}>
                   <MaterialIcons
-                    name={iconMap[item.category] || "payment"} // fallback icon
+                    name={iconMap[item.category] || "payment"}
                     size={24}
-                    color={iconColor}
+                    color={theme.icon}
                     style={{ marginRight: 10 }}
                   />
                   <View>
                     <ThemedText>{item.title || item.category}</ThemedText>
-                    <ThemedText style={{ fontSize: 12, color: "gray" }}>
+                    <ThemedText style={{ fontSize: 12, color: theme.icon }}>
                       {item.category}
                     </ThemedText>
                   </View>
                 </View>
                 <View style={styles.activityRight}>
                   <ThemedText>${item.amount.toFixed(2)}</ThemedText>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={16}
-                    color={theme.icon}
-                  />
+                  <Ionicons name="chevron-forward" size={16} color={theme.icon} />
                 </View>
-              </View>
+              </ThemedView>
             </TouchableOpacity>
           )}
           ListEmptyComponent={
@@ -205,42 +174,41 @@ const Home = ({ navigation }) => {
             </ThemedText>
           }
         />
+
         {showAddOptions && (
-        <View style={styles.overlay}>
-          <View style={styles.modal}>
-            <TouchableOpacity
-              style={styles.modalBtn}
-              onPress={() => {
-                setShowAddOptions(false);
-                router.push('/add_expense');
-              }}
-            >
-              <ThemedText>Add Expense</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalBtn}
-              onPress={() => {
-                setShowAddOptions(false);
-                router.push('/add_income');
-              }}
-            >
-              <ThemedText>Add Income</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setShowAddOptions(false)}
-              style={styles.modalCancel}
-            >
-              <ThemedText style={{ color: 'red' }}>Cancel</ThemedText>
-            </TouchableOpacity>
+          <View style={styles.overlay}>
+            <ThemedView style={styles.modal}>
+              <TouchableOpacity
+                style={styles.modalBtn}
+                onPress={() => {
+                  setShowAddOptions(false);
+                  router.push("/add_expense");
+                }}
+              >
+                <ThemedText>Add Expense</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalBtn}
+                onPress={() => {
+                  setShowAddOptions(false);
+                  router.push("/add_income");
+                }}
+              >
+                <ThemedText>Add Income</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setShowAddOptions(false)}
+                style={styles.modalCancel}
+              >
+                <ThemedText style={{ color: 'red' }}>Cancel</ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
           </View>
-        </View>
-      )}
+        )}
       </ThemedView>
     </SafeAreaView>
   );
-};
-
-export default Home;
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -253,10 +221,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     alignSelf: "center",
   },
-  redText: {
-    color: 'red',
-    fontWeight: 'bold',
-    marginTop: 8,
+  labelText: {
+    fontWeight: "bold",
   },
   balanceCard: {
     padding: 20,
@@ -270,7 +236,6 @@ const styles = StyleSheet.create({
   balanceText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: Colors.primary,
     marginTop: 5,
   },
   addBtn: {
@@ -288,11 +253,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     elevation: 1,
-  },
-  greenText: {
-    color: Colors.primary,
-    fontWeight: "bold",
-    marginTop: 8,
   },
   recentTitle: {
     fontSize: 18,
@@ -328,7 +288,6 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   modal: {
-    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
     width: "80%",
@@ -348,5 +307,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  
 });

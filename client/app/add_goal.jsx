@@ -1,165 +1,238 @@
-import { useState } from "react";
-import { SafeAreaView, TouchableOpacity, StyleSheet, Platform, Alert } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useColorScheme } from "react-native";
-import { supabase } from "@/lib/supabase";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import ModalSelector from "react-native-modal-selector";
-import ThemedView from "@/components/ThemedView";
-import ThemedText from "@/components/ThemedText";
-import ThemedTextInput from "@/components/ThemedTextInput";
-import ThemedButton from "@/components/ThemedButton";
-import { Colors } from "@/constants/Colors";
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  useColorScheme,
+  View,
+  Alert,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useRouter } from 'expo-router';
+import ModalSelector from 'react-native-modal-selector';
 
-export default function AddGoal() {
-  const theme = Colors[useColorScheme() ?? "light"];
+import { supabase } from '@/lib/supabase';
+import ThemedView from '@/components/ThemedView';
+import ThemedText from '@/components/ThemedText';
+import ThemedTextInput from '@/components/ThemedTextInput';
+import ThemedButton from '@/components/ThemedButton';
+import { Colors } from '@/constants/Colors';
+
+const AddGoal = () => {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme] ?? Colors.light;
 
-  const [name, setName] = useState("");
-  const [targetAmount, setTargetAmount] = useState("");
-  const [savedAmount, setSavedAmount] = useState("");
+  const [name, setName] = useState('');
+  const [targetAmount, setTargetAmount] = useState('');
+  const [savedAmount, setSavedAmount] = useState('');
+  const [monthlySaving, setMonthlySaving] = useState('');
+  const [priority, setPriority] = useState('');
   const [targetDate, setTargetDate] = useState(new Date());
+  const [note, setNote] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [priority, setPriority] = useState("");
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleSave = async () => {
-    const parsedTarget = parseFloat(targetAmount);
-    const parsedSaved = parseFloat(savedAmount || "0");
+    const parsedTarget = parseFloat(targetAmount.replace(/[^0-9.]/g, ''));
+    const parsedSaved = parseFloat(savedAmount.replace(/[^0-9.]/g, '') || '0');
+    const parsedMonthly = parseFloat(monthlySaving.replace(/[^0-9.]/g, '') || '0');
+
+    if (!name.trim()) {
+      Alert.alert('Missing Goal Name', 'Please enter a goal name.');
+      return;
+    }
 
     if (isNaN(parsedTarget) || parsedTarget <= 0) {
-      Alert.alert("Invalid Amount", "Please enter a valid target amount.");
+      Alert.alert('Invalid Target Amount', 'Please enter a valid target amount.');
       return;
     }
 
     if (!priority) {
-      Alert.alert("Priority Required", "Please select a priority for this goal.");
+      Alert.alert('Missing Priority', 'Please select a priority.');
       return;
     }
-
-    const progress = parsedSaved / parsedTarget;
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      Alert.alert("Authentication Error", "You must be logged in.");
+      Alert.alert('Authentication Error', 'You must be logged in.');
       return;
     }
 
-    const { error } = await supabase.from("goals").insert({
-      name,
-      user_id: user.id,
-      target_amount: parsedTarget,
-      saved_amount: parsedSaved,
-      progress,
-      target_date: targetDate.toISOString(),
-      priority,
-    });
+    const { error } = await supabase.from('goals').insert([
+      {
+        name,
+        target_amount: parsedTarget,
+        saved_amount: parsedSaved,
+        monthly_saving: parsedMonthly,
+        target_date: targetDate.toISOString(),
+        priority,
+        note,
+        user_id: user.id,
+      },
+    ]);
 
     if (error) {
-      console.error("Error adding goal:", error);
-      Alert.alert("Error", "Failed to save goal.");
+      Alert.alert('Error', 'Failed to save goal.');
+      console.error(error);
       return;
     }
 
-    router.back();
+    setName('');
+    setTargetAmount('');
+    setSavedAmount('');
+    setMonthlySaving('');
+    setPriority('');
+    setTargetDate(new Date());
+    setNote('');
+    setSuccessMessage('✅ Goal saved!');
+
+    setTimeout(() => {
+      setSuccessMessage('');
+      router.back();
+    }, 2000);
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      <ThemedView style={{ flex: 1, padding: 20 }}>
-        {/* Back */}
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={theme.icon} />
-        </TouchableOpacity>
+    <ThemedView style={styles.container}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} color={theme.icon} />
+      </TouchableOpacity>
 
-        <ThemedText title style={styles.header}>Add a New Goal</ThemedText>
+      <ThemedText title style={styles.header}>Add Goal</ThemedText>
 
-        <ThemedTextInput
-          placeholder="Goal name (e.g. House, Car, Wedding)"
-          value={name}
-          onChangeText={setName}
-          style={[styles.input, { borderColor: theme.icon, borderWidth: 1 }]}
-        />
+      <ThemedTextInput
+        placeholder="Goal Name (e.g. House, Trip, Wedding)"
+        value={name}
+        onChangeText={setName}
+        style={[styles.input, { borderColor: theme.icon }]}
+      />
 
-        <ThemedTextInput
-          placeholder="Target amount"
-          value={targetAmount}
-          onChangeText={setTargetAmount}
-          keyboardType="decimal-pad"
-          style={[styles.input, { borderColor: theme.icon, borderWidth: 1 }]}
-        />
+      <ThemedTextInput
+        placeholder="Target Amount ($)"
+        keyboardType="decimal-pad"
+        value={targetAmount}
+        onChangeText={setTargetAmount}
+        style={[styles.input, { borderColor: theme.icon }]}
+      />
 
-        <ThemedTextInput
-          placeholder="Amount already saved (optional)"
-          value={savedAmount}
-          onChangeText={setSavedAmount}
-          keyboardType="decimal-pad"
-          style={[styles.input, { borderColor: theme.icon, borderWidth: 1 }]}
-        />
+      <ThemedTextInput
+        placeholder="Amount Already Saved (optional)"
+        keyboardType="decimal-pad"
+        value={savedAmount}
+        onChangeText={setSavedAmount}
+        style={[styles.input, { borderColor: theme.icon }]}
+      />
 
-        {/* Priority Selector */}
+      <ThemedTextInput
+        placeholder="Monthly Saving (optional)"
+        keyboardType="decimal-pad"
+        value={monthlySaving}
+        onChangeText={setMonthlySaving}
+        style={[styles.input, { borderColor: theme.icon }]}
+      />
+
+      {/* Priority Selector */}
+      <View style={[styles.dateInput, { backgroundColor: theme.uibackground, borderColor: theme.icon }]}>
         <ModalSelector
           data={[
-            { key: "High", label: "High" },
-            { key: "Medium", label: "Medium" },
-            { key: "Low", label: "Low" },
+            { key: 'High', label: 'High' },
+            { key: 'Medium', label: 'Medium' },
+            { key: 'Low', label: 'Low' },
           ]}
-          initValue="Select Priority"
+          initValue="Select a priority"
           onChange={(option) => setPriority(option.key)}
-          style={[styles.selector, { borderColor: theme.icon, borderWidth: 1 }]}
-          initValueTextStyle={{ color: priority ? theme.text : "#999" }}
-          selectTextStyle={{ color: theme.text, padding: 10 }}
           optionTextStyle={{ color: theme.text }}
           optionContainerStyle={{ backgroundColor: theme.background }}
+          cancelStyle={{ backgroundColor: theme.background }}
           cancelTextStyle={{ color: theme.text }}
+          initValueTextStyle={{ color: priority ? theme.text : '#999999', fontSize: 16 }}
+          selectTextStyle={{ color: theme.text, fontSize: 16 }}
+          style={{ flex: 1 }}
         >
-          <ThemedText>
-            {priority || "Select Priority"}
-          </ThemedText>
+          <ThemedText>{priority || 'Select a priority'}</ThemedText>
         </ModalSelector>
+        <Ionicons name="chevron-down" size={20} color={theme.icon} />
+      </View>
 
-        {/* Date Picker */}
-        <TouchableOpacity
-          style={[styles.dateInput, { borderColor: theme.icon, backgroundColor: theme.uibackground }]}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <ThemedText>{targetDate.toDateString()}</ThemedText>
-          <Ionicons name="calendar-outline" size={20} color={theme.icon} />
-        </TouchableOpacity>
-        {showDatePicker && (
-          <DateTimePicker
-            value={targetDate}
-            mode="date"
-            display={Platform.OS === "ios" ? "inline" : "default"}
-            onChange={(e, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) setTargetDate(selectedDate);
-            }}
-          />
-        )}
+      {/* Target Date */}
+      <TouchableOpacity
+        style={[styles.dateInput, { borderColor: theme.icon, backgroundColor: theme.uibackground }]}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <ThemedText>{targetDate.toDateString()}</ThemedText>
+        <Ionicons name="calendar-outline" size={20} color={theme.icon} />
+      </TouchableOpacity>
 
-        <ThemedButton onPress={handleSave}>
-          <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>
-            Save Goal
-          </ThemedText>
-        </ThemedButton>
-      </ThemedView>
-    </SafeAreaView>
+      {showDatePicker && (
+        <DateTimePicker
+          value={targetDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate) setTargetDate(selectedDate);
+          }}
+        />
+      )}
+
+      <ThemedTextInput
+        placeholder="Add a note (optional)"
+        value={note}
+        onChangeText={setNote}
+        multiline
+        numberOfLines={3}
+        style={[styles.input, { height: 80, borderColor: theme.icon }]}
+      />
+
+      {successMessage !== '' && (
+        <ThemedText style={{ color: 'green', textAlign: 'center', marginBottom: 10 }}>
+          {successMessage}
+        </ThemedText>
+      )}
+
+      <ThemedButton onPress={handleSave}>
+        <ThemedText style={styles.btnText}>Save Goal</ThemedText>
+      </ThemedButton>
+    </ThemedView>
   );
-}
+};
+
+export default AddGoal;
 
 const styles = StyleSheet.create({
-  backBtn: { marginBottom: 12 },
-  header: { fontSize: 20, marginBottom: 20, fontWeight: "bold", textAlign: "center" },
-  input: { marginBottom: 16, borderRadius: 6, padding: 16 },
-  selector: { marginBottom: 16, borderRadius: 6 },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  backBtn: {
+    marginBottom: 10,
+  },
+  header: {
+    fontSize: 22,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  input: {
+    marginBottom: 15,
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 18,
+  },
   dateInput: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 18,
     borderRadius: 6,
+    marginBottom: 15,
     borderWidth: 1,
-    marginBottom: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  },
+  btnText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
