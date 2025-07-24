@@ -69,6 +69,6 @@ const styles = StyleSheet.create({
   subheading: { fontSize: 18, fontWeight: "600", marginTop: 20 },
   text: { fontSize: 14, lineHeight: 22 },
   backBtn: {
-    marginBottom: 12,
+    marginTop: 20,
   },
 });

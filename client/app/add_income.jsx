@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, Platform, useColorScheme, View, Alert } from 'react-native';
+import { StyleSheet, TouchableOpacity, Platform, useColorScheme, View, Alert, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
@@ -138,7 +138,7 @@ const AddIncome = () => {
         ]}
         onPress={() => setShowDatePicker(true)}
       >
-        <ThemedText>{date.toDateString()}</ThemedText>
+        <Text>{date.toDateString()}</Text>
         <Ionicons name="calendar-outline" size={20} color={theme.icon} />
       </TouchableOpacity>
 

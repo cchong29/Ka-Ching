@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SafeAreaView, TouchableOpacity, StyleSheet, ScrollView, View, Alert } from "react-native";
+import { SafeAreaView, TouchableOpacity, StyleSheet, ScrollView, View, Alert, Text } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "react-native";
@@ -85,10 +85,10 @@ export default function GoalDetails() {
 
           {/* Goal Details */}
           <View style={styles.detailsBox}>
-            <ThemedText style={styles.detailItem}>Target Amount: ${goal.target_amount.toFixed(2)}</ThemedText>
-            <ThemedText style={styles.detailItem}>Saved Amount: ${goal.saved_amount.toFixed(2)}</ThemedText>
-            <ThemedText style={styles.detailItem}>Target Date: {new Date(goal.target_date).toDateString()}</ThemedText>
-            <ThemedText style={styles.detailItem}>Priority: {goal.priority}</ThemedText>
+            <Text style={styles.detailItem}>Target Amount: ${goal.target_amount.toFixed(2)}</Text>
+            <Text style={styles.detailItem}>Saved Amount: ${goal.saved_amount.toFixed(2)}</Text>
+            <Text style={styles.detailItem}>Target Date: {new Date(goal.target_date).toDateString()}</Text>
+            <Text style={styles.detailItem}>Priority: {goal.priority}</Text>
           </View>
 
           {/* Edit & Delete Buttons */}
@@ -138,7 +138,7 @@ export default function GoalDetails() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  backBtn: { marginBottom: 12 },
+  backBtn: { marginTop: 20 },
   title: { fontSize: 22, fontWeight: "bold", marginBottom: 8 },
   subtitle: { fontSize: 16, marginBottom: 6 },
   progressLabel: { marginTop: 8, fontSize: 13, color: "gray" },
