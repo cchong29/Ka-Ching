@@ -265,6 +265,6 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   backBtn: {
-    marginBottom: 12,
+    marginTop: 20,
   },
 });

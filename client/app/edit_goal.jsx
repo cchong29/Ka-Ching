@@ -187,7 +187,7 @@ export default function EditGoal() {
 }
 
 const styles = StyleSheet.create({
-  backBtn: { marginBottom: 12 },
+  backBtn: { marginTop: 20 },
   title: { fontSize: 20, marginBottom: 20, fontWeight: "bold", textAlign: "center" },
   input: { marginBottom: 16, borderRadius: 6, padding: 16 },
   dateInput: {
