@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  Dimensions,
+  Dimensions, Text
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -74,10 +74,13 @@ export default function Plan() {
       const spent_amount = expensesData
         .filter(exp =>
           exp.category === budget.category &&
+          exp.title?.toLowerCase().trim() === budget.name?.toLowerCase().trim() &&
           new Date(exp.date) >= start &&
           new Date(exp.date) <= end
         )
         .reduce((sum, exp) => sum + exp.amount, 0);
+        console.log(spent_amount)
+        console.log()
 
       return { ...budget, spent_amount };
     });
@@ -144,15 +147,15 @@ export default function Plan() {
           {/* Progress Summary Cards */}
           <ThemedView style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
             <ThemedView style={[styles.summaryCard, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
-              <ThemedText style={styles.summaryNumber}>{activeGoalsCount}</ThemedText>
+              <Text style={styles.summaryNumber}>{activeGoalsCount}</Text>
               <ThemedText style={styles.summaryLabel}>Active Goals</ThemedText>
             </ThemedView>
             <ThemedView style={[styles.summaryCard, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
-              <ThemedText style={styles.summaryNumber}>{completedGoalsCount}</ThemedText>
+              <Text style={styles.summaryNumber}>{completedGoalsCount}</Text>
               <ThemedText style={styles.summaryLabel}>Completed Goals</ThemedText>
             </ThemedView>
             <ThemedView style={[styles.summaryCard, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
-              <ThemedText style={styles.summaryNumber}>{Math.round(avgProgress * 100)}%</ThemedText>
+              <Text style={styles.summaryNumber}>{Math.round(avgProgress * 100)}%</Text>
               <ThemedText style={styles.summaryLabel}>Average Progress</ThemedText>
             </ThemedView>
           </ThemedView>
@@ -177,7 +180,7 @@ export default function Plan() {
                 onPress={() => router.push({ pathname: "/goal_details", params: { id: g.id } })}
               >
                 <View style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
-                  <ThemedText style={{ fontWeight: "600" }}>{g.name}</ThemedText>
+                  <Text style={{ fontWeight: "600" }}>{g.name}</Text>
                   <ThemedText style={{ fontSize: 13, color: theme.icon }}>
                     ${g.saved_amount.toFixed(2)} / ${g.target_amount.toFixed(2)}
                   </ThemedText>
@@ -188,11 +191,11 @@ export default function Plan() {
                     height={10}
                     style={{ marginTop: 8, borderRadius: 5 }}
                   />
-                  <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
+                  <Text style={{ fontSize: 12, marginTop: 4 }}>
                     {progress >= 1
                       ? "✅ Goal reached!"
                       : `You need $${(g.target_amount - g.saved_amount).toFixed(2)} more`}
-                  </ThemedText>
+                  </Text>
 
                   {g.monthly_saving && g.monthly_saving > 0 && progress < 1 && (
                     <>
@@ -235,7 +238,7 @@ export default function Plan() {
                 onPress={() => router.push({ pathname: "/budget_details", params: { id: b.id } })}
               >
                 <View style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
-                  <ThemedText style={{ fontWeight: "600" }}>{b.name}</ThemedText>
+                  <Text style={{ fontWeight: "600" }}>{b.name}</Text>
                   <ThemedText style={{ fontSize: 13, color: theme.icon }}>
                     ${spent.toFixed(2)} / ${limit.toFixed(2)}
                   </ThemedText>
@@ -246,11 +249,11 @@ export default function Plan() {
                     height={10}
                     style={{ marginTop: 8, borderRadius: 5 }}
                   />
-                  <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
+                  <Text style={{ fontSize: 12, marginTop: 4 }}>
                     {progress >= 1
                       ? "⚠️ Over budget!"
                       : `You have $${(limit - spent).toFixed(2)} remaining`}
-                  </ThemedText>
+                  </Text>
                 </View>
               </TouchableOpacity>
             );
@@ -266,15 +269,15 @@ export default function Plan() {
           {/* Emergency Fund Section */}
           <ThemedText title style={[styles.sectionTitle]}>Emergency Fund</ThemedText>
           <View style={[styles.card, { backgroundColor: theme.uibackground, borderColor: theme.border }]}>
-            <ThemedText>Total Balance:</ThemedText>
-            <ThemedText style={{ fontWeight: "bold", fontSize: 18, marginVertical: 8 }}>
+            <Text>Total Balance:</Text>
+            <Text style={{ fontWeight: "bold", fontSize: 18, marginVertical: 8 }}>
               ${totalBalance.toFixed(2)}
-            </ThemedText>
+            </Text>
 
-            <ThemedText>Recommended Emergency Fund:</ThemedText>
-            <ThemedText style={{ fontWeight: "bold", fontSize: 18, marginVertical: 8 }}>
+            <Text>Recommended Emergency Fund:</Text>
+            <Text style={{ fontWeight: "bold", fontSize: 18, marginVertical: 8 }}>
               ${emergencyTarget.toFixed(2)}
-            </ThemedText>
+            </Text>
 
             <Progress.Bar
               progress={emergencyProgress}
@@ -284,11 +287,11 @@ export default function Plan() {
               style={{ borderRadius: 6 }}
             />
 
-            <ThemedText style={{ marginTop: 8, fontSize: 14 }}>
+            <Text style={{ marginTop: 8, fontSize: 14 }}>
               {emergencyProgress >= 1
                 ? "Great! Your emergency fund goal is met! 🎉"
                 : `You're ${(emergencyProgress * 100).toFixed(1)}% there!`}
-            </ThemedText>
+            </Text>
           </View>
 
           {/* Tip of the Day */}

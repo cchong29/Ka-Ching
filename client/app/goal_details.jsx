@@ -6,7 +6,8 @@ import { useColorScheme } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/Colors";
 import * as Progress from "react-native-progress";
-
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
 import ThemedButton from "@/components/ThemedButton";
@@ -14,49 +15,58 @@ import ThemedButton from "@/components/ThemedButton";
 export default function GoalDetails() {
   const { id } = useLocalSearchParams();
   const [goal, setGoal] = useState(null);
+  const [linkedTransactions, setLinkedTransactions] = useState([]);
   const theme = Colors[useColorScheme() ?? "light"];
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchGoal = async () => {
-      const { data } = await supabase
-        .from("goals")
-        .select("*")
-        .eq("id", id)
-        .single();
+  const fetchGoal = useCallback(async () => {
+  const { data, error } = await supabase
+    .from("goals")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (error) return Alert.alert("Error", "Failed to fetch goal.");
+  setGoal(data);
+}, [id]);
 
-      setGoal(data);
-    };
+const fetchLinkedTransactions = useCallback(async () => {
+  const { data, error } = await supabase
+    .from("linked_transactions") 
+    .select("id, income_id, income:income_id(amount)")
+    .eq("goal_id", id);
 
-    const handleDelete = async () => {
-      const confirm = window.confirm?.("Are you sure you want to delete this goal?") || 
-                      Alert.alert("Delete Goal", "Are you sure you want to delete this goal?", [
-                        { text: "Cancel", style: "cancel" },
-                        { text: "Delete", style: "destructive", onPress: async () => {
-                          const { error } = await supabase.from("goals").delete().eq("id", goal.id);
-                          if (error) {
-                            console.error("Error deleting goal:", error);
-                            Alert.alert("Error", "Failed to delete goal.");
-                          } else {
-                            router.back();
-                          }
-                        }},
-                      ]);
-    };
+  if (!error && data) {
+    // Transform it so it’s easier to read in render
+    const formatted = data.map((row) => ({
+      id: row.id,
+      amount: row.income?.amount || 0,
+      description: row.income?.description || "No description",
+    }));
+    setLinkedTransactions(formatted);
+  } else {
+    console.error("Fetch error:", error);
+  }
+}, [id]);
 
+
+useFocusEffect(
+  useCallback(() => {
     fetchGoal();
-  }, [id]);
-
+    fetchLinkedTransactions();
+  }, [fetchGoal, fetchLinkedTransactions])
+);
   if (!goal) return null;
 
-  const progress = Math.min(goal.saved_amount / goal.target_amount, 1);
+  // Sum amounts from linked transactions for progress
+  const linkedTotal = linkedTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+  const progress = Math.min(linkedTotal / goal.target_amount, 1);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <ThemedView style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Back Button */}
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => router.push('/plan')} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={theme.icon} />
           </TouchableOpacity>
 
@@ -67,7 +77,7 @@ export default function GoalDetails() {
 
           {/* Progress Info */}
           <ThemedText style={styles.subtitle}>
-            ${goal.saved_amount.toFixed(2)} / ${goal.target_amount.toFixed(2)}
+            ${linkedTotal.toFixed(2)} / ${goal.target_amount.toFixed(2)}
           </ThemedText>
           <Progress.Bar
             progress={progress}
@@ -80,7 +90,7 @@ export default function GoalDetails() {
           <ThemedText style={styles.progressLabel}>
             {progress >= 1
               ? "✅ Goal completed!"
-              : `You need $${(goal.target_amount - goal.saved_amount).toFixed(2)} more`}
+              : `You need $${(goal.target_amount - linkedTotal).toFixed(2)} more`}
           </ThemedText>
 
           {/* Goal Details */}
@@ -125,11 +135,28 @@ export default function GoalDetails() {
             </ThemedButton>
           </View>
 
-          {/* Linked Transactions Placeholder */}
+          {/* Linked Transactions */}
           <ThemedText title style={styles.sectionTitle}>Linked Transactions</ThemedText>
-          <ThemedText style={{ fontSize: 14, color: theme.icon }}>
-            No linked transactions yet.
-          </ThemedText>
+          {linkedTransactions.length === 0 ? (
+            <ThemedText style={{ fontSize: 14, color: theme.icon }}>
+              No linked transactions yet.
+            </ThemedText>
+          ) : (
+            linkedTransactions.map((t) => (
+              <View key={t.id} style={{ paddingVertical: 6 }}>
+                <Text>{t.transactions?.description || "Income"} - ${t.amount.toFixed(2)}</Text>
+              </View>
+            ))
+          )}
+
+          {/* Button to Link More Transactions */}
+          <ThemedButton
+            onPress={() => router.push({ pathname: "/link_transactions", params: { goal_id: id } })}
+            style={[styles.button, { marginTop: 20, backgroundColor: theme.tint }]}
+          >
+            <ThemedText style={{ color: "#fff", fontWeight: "bold" }}>Link Transactions</ThemedText>
+          </ThemedButton>
+
         </ScrollView>
       </ThemedView>
     </SafeAreaView>
