@@ -37,6 +37,8 @@ export default function Home() {
 
   const [username, setUsername] = useState("");
   const [expenses, setExpenses] = useState([]);
+  const [recentIncome, setRecentIncome] = useState([]);
+
   const [showAddOptions, setShowAddOptions] = useState(false);
   const [balance, setBalance] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
@@ -71,15 +73,20 @@ export default function Home() {
       .order("date", { ascending: false })
       .limit(10);
 
-    const { data: incomeData } = await supabase
+      const { data: incomeData } = await supabase
       .from("income")
       .select("*")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .order("date", { ascending: false }) // 🆕 for recent
+      .limit(10); // 🆕 only get latest 10
+    
 
     const totalExpenses = (expensesData || []).reduce((sum, item) => sum + item.amount, 0);
     const totalIncome = (incomeData || []).reduce((sum, item) => sum + item.amount, 0);
 
     setExpenses(expensesData || []);
+    setRecentIncome(incomeData || []); // 🆕
+
     setTotalExpenses(totalExpenses);
     setTotalIncome(totalIncome);
     setBalance(totalIncome - totalExpenses);
