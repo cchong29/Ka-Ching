@@ -183,7 +183,7 @@ const ExpensesDashboard = () => {
                 withVerticalLabels={true}
                 withHorizontalLabels={false}
                 yAxisLabel=""
-                style={{ borderRadius: 12, marginLeft: 0 }}
+                style={{ borderRadius: 12, marginLeft: -50 }}
               />
             </ScrollView>
           </ThemedView>
