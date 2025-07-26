@@ -21,7 +21,9 @@ export default function WebviewScreen() {
     <WebView
       source={{ uri: url }}
       onNavigationStateChange={async ({ url }) => {
+        console.log('Navigation state changed',url)
         if (url.includes("?code=")) {
+          console.log('If condition triggered')
           const code = new URL(url).searchParams.get("code");
           console.log('Got code',code)
 

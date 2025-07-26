@@ -28,6 +28,7 @@ router.post("/token", async (req, res) => {
 // Using link URL included in the link_token response to launch Finverse Link UI
 // which will guide the end-user through selecting an institution and authenticating with it.
 router.post("/link-token", async (req, res) => {
+  console.log('Starting to generate link-token')
   const { customer_token } = req.body;
   const result = await axios.post(
     `${FINVERSE_BASE}/link/token`,
@@ -45,9 +46,11 @@ router.post("/link-token", async (req, res) => {
     }
   );
   res.json(result.data); // contains link_url
+  console.log('Generated link url')
 });
 
 router.post("/exchange-code", async (req, res) => {
+  console.log('Starting exchange code process')
   const { code } = req.body;
   const result = await axios.post(`${FINVERSE_BASE}/auth/token`, {
     code,
@@ -56,6 +59,7 @@ router.post("/exchange-code", async (req, res) => {
     grant_type: "authorization_code",
   });
   res.json(result.data); // contains login_identity_token
+  console.log('Generated login identity token')
 
   // Securely store each login_identity_token in backend
   // Note: an end-user with 2 linked institutions will have a distinct token for each institution.
@@ -109,7 +113,7 @@ router.get("/callback", async (req, res) => {
     
     // Redirect back to your app with success
     // You'll need to configure a custom scheme for your app
-    res.redirect(`yourapp://finverse-success?token=${encodeURIComponent(login_identity_token)}`);
+    res.redirect(`client://finverse-success?token=${encodeURIComponent(login_identity_token)}`);
     
   } catch (error) {
     console.error("Error in callback:", error);
