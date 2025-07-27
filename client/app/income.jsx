@@ -98,7 +98,13 @@ const IncomeDashboard = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Back Button */}
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => {
+              if (router.canGoBack?.()) {
+                router.back();
+              } else {
+                router.replace("/home"); // 👈 fallback route
+              }
+            }}
             style={styles.backBtn}
           >
             <Ionicons name="arrow-back" size={24} color={theme.icon} />

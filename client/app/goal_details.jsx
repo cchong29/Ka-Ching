@@ -40,14 +40,14 @@ export default function GoalDetails() {
   const fetchLinkedTransactions = useCallback(async () => {
     const { data, error } = await supabase
       .from("linked_transactions")
-      .select("id, income_id, income:income_id(amount, note)")
+      .select("id, income_id, income:income_id(title, amount)")
       .eq("goal_id", id);
 
     if (!error && data) {
       const formatted = data.map((row) => ({
         id: row.id,
         amount: row.income?.amount || 0,
-        description: row.income?.note || "No description",
+        title: row.income?.title || "No title",
       }));
       setLinkedTransactions(formatted);
     } else {
@@ -165,7 +165,7 @@ export default function GoalDetails() {
             linkedTransactions.map((t) => (
               <View key={t.id} style={{ paddingVertical: 6 }}>
                 <Text>
-                  {t.description} - ${t.amount.toFixed(2)}
+                  {t.title} - ${t.amount.toFixed(2)}
                 </Text>
               </View>
             ))
