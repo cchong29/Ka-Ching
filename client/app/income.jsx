@@ -46,9 +46,14 @@ const IncomeDashboard = () => {
 
   useEffect(() => {
     const fetchIncomes = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const { data, error } = await supabase
         .from("income")
         .select("*")
+        .eq("user_id", user.id) // 👈 filter by logged-in user
         .order("date", { ascending: false });
 
       if (!error && data) setIncomes(data);
@@ -67,8 +72,18 @@ const IncomeDashboard = () => {
 
   const barChartData = {
     labels: [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ],
     datasets: [
       {
@@ -116,7 +131,14 @@ const IncomeDashboard = () => {
 
           {/* Category Filter */}
           <View style={styles.filterWrap}>
-            {["All", "Salary", "Freelance", "Business", "Investments", "Others"].map((cat) => (
+            {[
+              "All",
+              "Salary",
+              "Freelance",
+              "Business",
+              "Investments",
+              "Others",
+            ].map((cat) => (
               <TouchableOpacity
                 key={cat}
                 onPress={() => setSelectedCategory(cat)}
@@ -124,7 +146,9 @@ const IncomeDashboard = () => {
                   styles.filterBtn,
                   {
                     backgroundColor:
-                      selectedCategory === cat ? theme.tint : theme.uibackground,
+                      selectedCategory === cat
+                        ? theme.tint
+                        : theme.uibackground,
                     borderColor: theme.tint,
                   },
                 ]}
