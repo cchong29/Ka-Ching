@@ -31,36 +31,41 @@ export default function LinkTransactions() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-
-      // Step 1: Get linked income IDs for this user
+    
+      // Get linked income IDs for this user
       const { data: linkedIncomes, error: linkedError } = await supabase
         .from("linked_transactions")
         .select("income_id")
         .eq("user_id", user.id);
-
+    
       if (linkedError) {
         console.error("Error fetching linked transactions:", linkedError);
         return;
       }
-
+    
       const linkedIncomeIds =
         linkedIncomes?.map((item) => item.income_id) || [];
-
-      // Step 2: Fetch income excluding linked ones
-      let query = supabase.from("income").select("*");
+    
+      // Fetch income belonging to this user only, excluding linked ones
+      let query = supabase
+        .from("income")
+        .select("*")
+        .eq("user_id", user.id);  
+    
       if (linkedIncomeIds.length > 0) {
         query = query.not("id", "in", `(${linkedIncomeIds.join(",")})`);
       }
-
+    
       const { data: incomeData, error: incomeError } = await query;
-
+    
       if (incomeError) {
         console.error("Error fetching income:", incomeError);
         return;
       }
-
+    
       setIncomeTransactions(incomeData || []);
     };
+    
 
     fetchIncome();
   }, []);
