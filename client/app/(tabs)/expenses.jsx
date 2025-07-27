@@ -117,7 +117,7 @@ const ExpensesDashboard = () => {
           <ThemedText title style={{ fontSize: 20, marginBottom: 8 }}>
             Total Spent: ${runningTotal}
           </ThemedText>
-          <ThemedText style={{ marginBottom: 16, color: theme.text }}>
+          <ThemedText style={{ marginBottom: 16 }}>
             This Month: ${currentMonthSpending}
           </ThemedText>
 
@@ -156,17 +156,16 @@ const ExpensesDashboard = () => {
                 const roundedMax = Math.ceil(maxVal / 10) * 10;
                 const yLabel = ((roundedMax / 4) * (4 - i)).toFixed(0);
                 return (
-                  <Text
+                  <ThemedText
                     key={i}
                     style={{
                       fontSize: 12,
                       textAlign: "right",
                       paddingRight: 5,
-                      color: theme.text,
                     }}
                   >
                     ${yLabel}
-                  </Text>
+                  </ThemedText>
                 );
               })}
             </ThemedView>

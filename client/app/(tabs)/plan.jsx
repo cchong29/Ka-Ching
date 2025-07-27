@@ -368,20 +368,20 @@ const emergencyProgress = emergencyTarget
 
                             return (
                               <>
-                                <ThemedText
+                                <Text
                                   style={{ fontSize: 12, marginTop: 4 }}
                                 >
                                   Currently saving $
                                   {g.monthly_saving.toFixed(2)} per month.
-                                </ThemedText>
-                                <ThemedText
+                                </Text>
+                                <Text
                                   style={{ fontSize: 12, marginTop: 4 }}
                                 >
                                   You need to save ${neededPerMonth.toFixed(2)}{" "}
                                   per month to reach your goal by{" "}
                                   {target.toLocaleDateString("en-GB")}.
-                                </ThemedText>
-                                <ThemedText
+                                </Text>
+                                <Text
                                   style={{
                                     fontSize: 12,
                                     color: theme.icon,
@@ -390,7 +390,7 @@ const emergencyProgress = emergencyTarget
                                 >
                                   Remaining Day{daysRemaining !== 1 ? "s" : ""}:{" "}
                                   {daysRemaining}
-                                </ThemedText>
+                                </Text>
                               </>
                             );
                           })()}
