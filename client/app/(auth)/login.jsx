@@ -61,7 +61,7 @@ const Login = ({ promptAsync, isSigningIn, apple }) => {
       console.log('✅ Login success:');
     
       setLoginError('');
-      router.push('/(tabs)/home');
+      router.replace('/(tabs)/home');
     },
   });
 

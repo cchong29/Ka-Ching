@@ -43,28 +43,35 @@ export default function Profile() {
 
   const signOut = async () => {
     try {
+      // Google Sign Out
       await GoogleSignin.signOut();
-    } catch (err) {
-      console.log('Google sign-out failed', err.message);
-    }
-
-    try {
-      const res = await fetch(`${baseUrl}/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      const data = await res.json();
-      if (data.loggedOut) {
-        router.replace('/');
-      } else {
-        Alert.alert('Logout Failed', 'Please try again.');
+  
+      // Supabase Sign Out
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.log("Supabase sign-out error:", error.message);
       }
+  
+      // Optional: Logout from custom backend
+      try {
+        const res = await fetch(`${baseUrl}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+        const data = await res.json();
+        console.log("Backend logout response:", data);
+      } catch (backendErr) {
+        console.log("Backend logout failed:", backendErr.message);
+      }
+  
+      // Redirect to login page
+      router.replace('/');
     } catch (err) {
-      console.log('Error logging out:', err.message);
-      Alert.alert('Logout Error', 'Could not log out. Please try again.');
+      console.log("Sign out failed:", err.message);
+      Alert.alert("Logout Failed", "Please try again.");
     }
   };
+  
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.background }}>
