@@ -9,9 +9,8 @@ import {
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect} from "expo-router";
 import { supabase } from "@/lib/supabase";
-import { useFocusEffect } from "@react-navigation/native";
 import * as Progress from "react-native-progress";
 
 import ThemedView from "@/components/ThemedView";
@@ -37,7 +36,6 @@ export default function Plan() {
   const [monthlyAvgExpenses, setMonthlyAvgExpenses] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Fetch data from Supabase
   const fetchData = useCallback(async () => {
     setLoading(true);
     const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -46,31 +44,76 @@ export default function Plan() {
       setLoading(false);
       return;
     }
-
-    const [goalsResponse, budgetsResponse, incomeResponse, expensesResponse] = await Promise.all([
+  
+    // Fetch goals, budgets, income, expenses, and linked transactions
+    const [goalsResponse, budgetsResponse, incomeResponse, expensesResponse, linkedTxResponse] = await Promise.all([
       supabase.from("goals").select("*").eq("user_id", user.id),
       supabase.from("budgets").select("*").eq("user_id", user.id),
       supabase.from("income").select("amount").eq("user_id", user.id),
       supabase.from("expenses").select("amount, category, date").eq("user_id", user.id),
+      supabase.from("linked_transactions").select("goal_id, income:income_id(amount)").eq("user_id", user.id),
     ]);
-
+  
     const goalsData = goalsResponse.data || [];
     const budgetsData = budgetsResponse.data || [];
     const incomeData = incomeResponse.data || [];
     const expensesData = expensesResponse.data || [];
-
+    const linkedTransactions = (linkedTxResponse.data || []).map(tx => ({
+      goal_id: tx.goal_id,
+      amount: tx.income?.amount || 0,  // get amount from joined income record
+    }));
+  
     // Calculate total income and total expenses
     const totalIncome = incomeData.reduce((sum, inc) => sum + inc.amount, 0);
     const totalExpenses = expensesData.reduce((sum, exp) => sum + exp.amount, 0);
-
     const computedBalance = totalIncome - totalExpenses;
     setTotalBalance(computedBalance);
+  
+    // Map goal_id to total linked transactions amount
+    const linkedSums = linkedTransactions.reduce((acc, tx) => {
+      acc[tx.goal_id] = (acc[tx.goal_id] || 0) + tx.amount;
+      return acc;
+    }, {});
+  
+    // Calculate months elapsed for monthly savings calculation
+    const now = new Date();
+  
+    // Calculate saved_amount dynamically per goal
+    const goalsWithSaved = goalsData.map(g => {
+      const createdDate = g.created_at ? new Date(g.created_at) : now;
+      const targetDate = g.target_date ? new Date(g.target_date) : null;
+    
+      let expectedSaved = 0;
+      if (targetDate && g.monthly_saving) {
+        const totalDurationMonths =
+          (targetDate.getFullYear() - createdDate.getFullYear()) * 12 +
+          (targetDate.getMonth() - createdDate.getMonth());
+    
+        const monthsElapsed =
+          (now.getFullYear() - createdDate.getFullYear()) * 12 +
+          (now.getMonth() - createdDate.getMonth());
+    
+        const savingMonths = Math.min(monthsElapsed, totalDurationMonths);
+        expectedSaved = g.monthly_saving * Math.max(savingMonths, 0);
+      }
+    
+      const linkedAmount = linkedSums[g.id] || 0; 
+    
+      const totalSaved = linkedAmount + expectedSaved;
+  
+      return {
+        ...g,
+        saved_amount: totalSaved,
+      };
+    });
+  
+    setGoals(goalsWithSaved);
 
-    // Calculate spent amount for each budget
+    // Calculate spent amount for each budget (keep your existing logic)
     const updatedBudgets = budgetsData.map((budget) => {
       const start = new Date(budget.start_date);
       const end = new Date(budget.end_date);
-
+  
       const spent_amount = expensesData
         .filter(exp =>
           exp.category === budget.category &&
@@ -79,13 +122,11 @@ export default function Plan() {
           new Date(exp.date) <= end
         )
         .reduce((sum, exp) => sum + exp.amount, 0);
-        console.log(spent_amount)
-        console.log()
-
+  
       return { ...budget, spent_amount };
     });
-
-    // Calculate average monthly expenses (for emergency fund)
+  
+    // Calculate average monthly expenses for emergency fund
     let expensesByMonth = {};
     expensesData.forEach((exp) => {
       const dt = new Date(exp.date);
@@ -95,8 +136,8 @@ export default function Plan() {
     const monthsCount = Object.keys(expensesByMonth).length || 1;
     const avgMonthly = Object.values(expensesByMonth).reduce((a, b) => a + b, 0) / monthsCount;
     setMonthlyAvgExpenses(avgMonthly);
-
-    setGoals(goalsData);
+  
+    // Update states with computed values
     setBudgets(updatedBudgets);
     setLoading(false);
   }, []);
@@ -197,15 +238,55 @@ export default function Plan() {
                       : `You need $${(g.target_amount - g.saved_amount).toFixed(2)} more`}
                   </Text>
 
-                  {g.monthly_saving && g.monthly_saving > 0 && progress < 1 && (
+                  {progress < 1 && (
                     <>
-                      <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
-                        Currently saving ${g.monthly_saving}/month. You have {Math.ceil((g.target_amount - g.saved_amount) / g.monthly_saving)} months left!
-                      </ThemedText>
-                      {g.created_at && (
-                        <ThemedText style={{ fontSize: 12, color: theme.icon, marginTop: 4 }}>
-                          Estimated completion: {new Date(new Date(g.created_at).getTime() + Math.ceil((g.target_amount - g.saved_amount) / g.monthly_saving) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                        </ThemedText>
+                      {g.target_date ? (
+                        <>
+                          {/* Calculate months remaining until target_date */}
+                          {(() => {
+                            const now = new Date();
+                            const target = new Date(g.target_date);
+
+                            const monthsRemaining = Math.max(
+                              1,
+                              (target.getFullYear() - now.getFullYear()) * 12 +
+                              (target.getMonth() - now.getMonth())
+                            );
+
+                            const daysRemaining = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+                            // Calculate monthly amount still needed to save
+                            const amountRemaining = g.target_amount - g.saved_amount;
+                            const neededPerMonth = amountRemaining > 0 ? amountRemaining / monthsRemaining : 0;
+
+                            return (
+                              <>
+                                <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
+                                  Currently saving ${g.monthly_saving.toFixed(2)} per month.
+                                </ThemedText>
+                                <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
+                                  You need to save ${neededPerMonth.toFixed(2)} per month to reach your goal by {target.toLocaleDateString('en-GB')}.
+                                </ThemedText>
+                                <ThemedText style={{ fontSize: 12, color: theme.icon, marginTop: 4 }}>
+                                  Remaining Day{daysRemaining !== 1 ? 's' : ''}: {daysRemaining}
+                                </ThemedText>
+                              </>
+                            );
+                          })()}
+                        </>
+                      ) : (
+                        g.monthly_saving && g.monthly_saving > 0 && (
+                          <>
+                            <ThemedText style={{ fontSize: 12, marginTop: 4 }}>
+                              Currently saving ${g.monthly_saving}/month. You have {Math.ceil((g.target_amount - g.saved_amount) / g.monthly_saving)} month{Math.ceil((g.target_amount - g.saved_amount) / g.monthly_saving) !== 1 ? 's' : ''} left!
+                            </ThemedText>
+                            {g.created_at && (
+                              <ThemedText style={{ fontSize: 12, color: theme.icon, marginTop: 4 }}>
+                                Estimated completion: {new Date(new Date(g.created_at).getTime() + Math.ceil((g.target_amount - g.saved_amount) / g.monthly_saving) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB')}
+                              </ThemedText>
+                            )}
+                          </>
+                        )
                       )}
                     </>
                   )}

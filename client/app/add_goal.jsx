@@ -26,7 +26,6 @@ const AddGoal = () => {
 
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
-  const [savedAmount, setSavedAmount] = useState('');
   const [monthlySaving, setMonthlySaving] = useState('');
   const [priority, setPriority] = useState('');
   const [targetDate, setTargetDate] = useState(new Date());
@@ -36,7 +35,6 @@ const AddGoal = () => {
 
   const handleSave = async () => {
     const parsedTarget = parseFloat(targetAmount.replace(/[^0-9.]/g, ''));
-    const parsedSaved = parseFloat(savedAmount.replace(/[^0-9.]/g, '') || '0');
     const parsedMonthly = parseFloat(monthlySaving.replace(/[^0-9.]/g, '') || '0');
 
     if (!name.trim()) {
@@ -64,7 +62,6 @@ const AddGoal = () => {
       {
         name,
         target_amount: parsedTarget,
-        saved_amount: parsedSaved,
         monthly_saving: parsedMonthly,
         target_date: targetDate.toISOString(),
         priority,
@@ -81,7 +78,6 @@ const AddGoal = () => {
 
     setName('');
     setTargetAmount('');
-    setSavedAmount('');
     setMonthlySaving('');
     setPriority('');
     setTargetDate(new Date());
@@ -114,14 +110,6 @@ const AddGoal = () => {
         keyboardType="decimal-pad"
         value={targetAmount}
         onChangeText={setTargetAmount}
-        style={[styles.input, { borderColor: theme.icon }]}
-      />
-
-      <ThemedTextInput
-        placeholder="Amount Already Saved (optional)"
-        keyboardType="decimal-pad"
-        value={savedAmount}
-        onChangeText={setSavedAmount}
         style={[styles.input, { borderColor: theme.icon }]}
       />
 
