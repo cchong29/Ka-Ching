@@ -195,9 +195,17 @@ export default function Plan() {
 
   // Emergency Fund calculations
   const emergencyTarget = monthlyAvgExpenses * emergencyMonths;
-const emergencyProgress = emergencyTarget
+  const emergencyProgress = emergencyTarget
   ? Math.min(totalBalance / emergencyTarget, 1)
   : 0;
+
+  // Define priority order for sorting
+  const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+
+  // Create a sorted copy of goals by user-set priority
+  const sortedGoals = [...goals].sort(
+    (a, b) => (priorityOrder[a.priority] || 99) - (priorityOrder[b.priority] || 99)
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -296,7 +304,8 @@ const emergencyProgress = emergencyTarget
               No goals yet. Tap “+ Add Goal” to create one.
             </ThemedText>
           )}
-          {goals.map((g) => {
+          
+          {sortedGoals.map((g) => {
             const progress = g.target_amount
               ? Math.min(g.saved_amount / g.target_amount, 1)
               : 0;
