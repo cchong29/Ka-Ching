@@ -52,6 +52,7 @@ export default function RootLayout() {
           <Stack.Screen name="link_transactions" options={{ headerShown: false }} />
           <Stack.Screen name="income_details" options={{ headerShown: false }} />
           <Stack.Screen name="edit_income" options={{ headerShown: false }} />
+          <Stack.Screen name="finverse" options={{ title: "Finverse" }} />
 
             <Stack.Screen name="edit_budgets" options={{ headerShown: false }} />
             <Stack.Screen name="goal_details" options={{ headerShown: false }} />

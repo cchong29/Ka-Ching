@@ -270,17 +270,16 @@ export default function Home() {
           
             return (
               <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname:
-                      item.type === "expense"
-                        ? "/expense_details"
-                        : item.type === "income"
-                        ? "/income_details"
-                        : "/goal_details",
-                    params: { ...item },
-                  })
-                }
+              onPress={() =>
+                router.push(
+                  item.type === "expense"
+                    ? { pathname: "/expense_details", params: { ...item } }
+                    : item.type === "income"
+                    ? { pathname: "/income_details", params: { ...item } }
+                    : { pathname: "/goal_details", params: { id: item.goal_id } } // 👈 fix only for goal
+                )
+              }
+              
               >
                 <ThemedView style={styles.activityItem}>
                   <View style={styles.activityLeft}>

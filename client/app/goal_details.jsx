@@ -83,7 +83,7 @@ export default function GoalDetails() {
       <ThemedView style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Back Button */}
-          <TouchableOpacity onPress={() => router.push("/plan")} style={styles.backBtn}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={theme.icon} />
           </TouchableOpacity>
 
