@@ -9,6 +9,9 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from "../../lib/supabase";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext'; // ✅
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+
 
 export default function Profile() {
   const [username, setUsername] = useState("");
@@ -71,7 +74,31 @@ export default function Profile() {
       Alert.alert("Logout Failed", "Please try again.");
     }
   };
-  
+  const exportExpenses = async ()=> {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return;
+    const { data: csvData, error } = await supabase
+            .from('expenses')
+            .select()
+            .eq("user_id", user.id)
+            .csv()
+            if (error){console.log(error)}
+      // 2. Save to file
+const fileUri = FileSystem.cacheDirectory + "expenses.csv";
+
+await FileSystem.writeAsStringAsync(fileUri, csvData, {
+  encoding: FileSystem.EncodingType.UTF8,
+});
+console.log("CSV saved to:", fileUri);
+// 3. Share the file
+if (!(await Sharing.isAvailableAsync())) {
+  alert("Sharing is not available on this device");
+  return;
+}
+
+await Sharing.shareAsync(fileUri);
+            }
+            
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.background }}>
@@ -96,6 +123,7 @@ export default function Profile() {
             <Item icon={<Feather name="lock" size={20} />} label="Change Password" theme={theme} onPress={() => router.push('/changepw')} />
             <Item icon={<Feather name="link" size={20} />} label="Linked Banks" theme={theme} />
             <Item icon={<Feather name="sun" size={20} />} label={`${theme === 'light' ? 'Dark' : 'Light'} Mode`} theme={theme} onPress={toggleTheme} />
+            <Item icon={<Feather name="download" size={20} />} label="Export Expenses (CSV)" theme={theme} onPress = {exportExpenses}/>
           </Section>
 
           {/* Support and Legal */}
