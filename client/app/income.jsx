@@ -17,6 +17,9 @@ import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/Colors";
 import ThemedView from "@/components/ThemedView";
 import ThemedText from "@/components/ThemedText";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -44,24 +47,26 @@ const IncomeDashboard = () => {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchIncomes = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      const { data, error } = await supabase
-        .from("income")
-        .select("*")
-        .eq("user_id", user.id) // 👈 filter by logged-in user
-        .order("date", { ascending: false });
-
-      if (!error && data) setIncomes(data);
-    };
-
-    fetchIncomes();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      const fetchIncome = async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+  
+        const { data, error } = await supabase
+          .from("income")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("date", { ascending: false });
+  
+        if (!error && data) setIncomes(data);
+      };
+  
+      fetchIncome();
+    }, [])
+  );
+  
   const monthTotals = incomes.reduce((acc, income) => {
     const month = new Date(income.date).getMonth();
     const match =
