@@ -28,7 +28,6 @@ export default function EditGoal() {
   const [goal, setGoal] = useState(null);
   const [name, setName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
-  const [savedAmount, setSavedAmount] = useState("");
   const [monthlySaving, setMonthlySaving] = useState("");
   const [priority, setPriority] = useState("");
   const [targetDate, setTargetDate] = useState(new Date());
@@ -50,7 +49,6 @@ export default function EditGoal() {
       setGoal(data);
       setName(data.name);
       setTargetAmount(String(data.target_amount));
-      setSavedAmount(String(data.saved_amount));
       setMonthlySaving(String(data.monthly_saving));
       setPriority(data.priority);
       setTargetDate(new Date(data.target_date));
@@ -61,33 +59,33 @@ export default function EditGoal() {
 
   const handleUpdate = async () => {
     const parsedTarget = parseFloat(targetAmount);
-    const parsedSaved = parseFloat(savedAmount || "0");
     const parsedMonthly = parseFloat(monthlySaving || "0");
-
+  
     if (!name || isNaN(parsedTarget) || parsedTarget <= 0) {
       Alert.alert("Invalid input", "Please enter valid goal details.");
       return;
     }
-
-    const progress = parsedSaved / parsedTarget;
-
+  
     const { error } = await supabase
       .from("goals")
       .update({
         name,
         target_amount: parsedTarget,
-        saved_amount: parsedSaved,
         monthly_saving: parsedMonthly,
         target_date: targetDate.toISOString(),
         priority,
-        progress,
       })
       .eq("id", id);
-
+  
     if (error) {
       Alert.alert("Error", "Failed to update goal.");
     } else {
-      router.back();
+      Alert.alert("Success", "Goal updated!", [
+        {
+          text: "OK",
+          onPress: () => router.back(), // Go back after confirmation
+        },
+      ]);
     }
   };
 
@@ -113,14 +111,6 @@ export default function EditGoal() {
           placeholder="Target amount"
           value={targetAmount}
           onChangeText={setTargetAmount}
-          keyboardType="decimal-pad"
-          style={[styles.input, { borderColor: theme.icon, borderWidth: 1 }]}
-        />
-
-        <ThemedTextInput
-          placeholder="Amount already saved"
-          value={savedAmount}
-          onChangeText={setSavedAmount}
           keyboardType="decimal-pad"
           style={[styles.input, { borderColor: theme.icon, borderWidth: 1 }]}
         />
