@@ -60,7 +60,7 @@ export default function Plan() {
       supabase.from("income").select("amount").eq("user_id", user.id),
       supabase
         .from("expenses")
-        .select("amount, category, date")
+        .select("*")
         .eq("user_id", user.id),
       supabase
         .from("linked_transactions")
@@ -126,7 +126,7 @@ export default function Plan() {
 
     setGoals(goalsWithSaved);
 
-    // Calculate spent amount for each budget (keep your existing logic)
+    // Calculate spent amount for each budget 
     const updatedBudgets = budgetsData.map((budget) => {
       const start = new Date(budget.start_date);
       const end = new Date(budget.end_date);
@@ -135,12 +135,13 @@ export default function Plan() {
         .filter(
           (exp) =>
             exp.category === budget.category &&
-            exp.title?.toLowerCase().trim() ===
-              budget.name?.toLowerCase().trim() &&
+          exp.title?.toLowerCase().trim() ===
+          budget.name?.toLowerCase().trim() &&
             new Date(exp.date) >= start &&
             new Date(exp.date) <= end
         )
         .reduce((sum, exp) => sum + exp.amount, 0);
+        
 
       return { ...budget, spent_amount };
     });
