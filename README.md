@@ -37,8 +37,8 @@ We hope to develop a Smart Expense & Investment Tracker that automatically impor
 - Backend: Node.js with Express (API development)
 - Database: PostgreSQL (for structured financial data storage)
 - AI/ML: Python with TensorFlow/PyTorch (for transaction categorization and predictive analytics)
-- Cloud Hosting: Firebase 
-- Authentication: Firebase Auth 
+- Cloud Hosting: Google Cloud  
+- Authentication: Supabase Auth 
 - Development Tools: GitHub, Postman (for API testing)
 
 
